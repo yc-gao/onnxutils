@@ -13,16 +13,18 @@ def mse_kernel(gt, pred, reduction='none'):
     metrics = torch.pow(gt - pred, 2).mean(dim=-1)
 
     if reduction == 'none':
-        return metrics
-    if reduction == 'max':
-        return metrics.max()
-    if reduction == 'min':
-        return metrics.min()
-    if reduction == 'mean':
-        return metrics.mean()
-    if reduction == 'sum':
-        return metrics.sum()
-    raise NotImplementedError
+        pass
+    elif reduction == 'max':
+        metrics = metrics.max()
+    elif reduction == 'min':
+        metrics = metrics.min()
+    elif reduction == 'mean':
+        metrics = metrics.mean()
+    elif reduction == 'sum':
+        metrics = metrics.sum()
+    else:
+        raise NotImplementedError
+    return metrics.tolist()
 
 
 def cosine_kernel(gt, pred, reduction='none'):
@@ -37,16 +39,18 @@ def cosine_kernel(gt, pred, reduction='none'):
     metrics = torch.cosine_similarity(gt, pred, dim=-1)
 
     if reduction == 'none':
-        return metrics
-    if reduction == 'max':
-        return metrics.max()
-    if reduction == 'min':
-        return metrics.min()
-    if reduction == 'mean':
-        return metrics.mean()
-    if reduction == 'sum':
-        return metrics.sum()
-    raise NotImplementedError
+        pass
+    elif reduction == 'max':
+        metrics = metrics.max()
+    elif reduction == 'min':
+        metrics = metrics.min()
+    elif reduction == 'mean':
+        metrics = metrics.mean()
+    elif reduction == 'sum':
+        metrics = metrics.sum()
+    else:
+        raise NotImplementedError
+    return metrics.tolist()
 
 
 def snr_kernel(gt, pred, eps=1e-7, reduction='none'):
@@ -63,16 +67,18 @@ def snr_kernel(gt, pred, eps=1e-7, reduction='none'):
     ).sum(dim=-1)
 
     if reduction == 'none':
-        return metrics
-    if reduction == 'max':
-        return metrics.max()
-    if reduction == 'min':
-        return metrics.min()
-    if reduction == 'mean':
-        return metrics.mean()
-    if reduction == 'sum':
-        return metrics.sum()
-    raise NotImplementedError
+        pass
+    elif reduction == 'max':
+        metrics = metrics.max()
+    elif reduction == 'min':
+        metrics = metrics.min()
+    elif reduction == 'mean':
+        metrics = metrics.mean()
+    elif reduction == 'sum':
+        metrics = metrics.sum()
+    else:
+        raise NotImplementedError
+    return metrics.tolist()
 
 
 def compute_metric(gt, pred, kernel_fn, *args, **kwargs):
