@@ -179,6 +179,10 @@ class OnnxModel:
                 self._nodes_to_remove = []
                 self._nodes_to_add = []
 
+                self._inputs_to_remove = []
+                self._inputs_to_add = []
+
+                self._outputs_to_remove = []
                 self._outputs_to_add = []
 
             def unique_name(self):
@@ -215,6 +219,15 @@ class OnnxModel:
             def remap_node_inputs(self, remap):
                 self._remap_node_inputs.update(remap)
 
+            def remove_input(self, input):
+                self._inputs_to_remove.append(input)
+
+            def add_input(self, input):
+                self._inputs_to_add.append(input)
+
+            def remove_output(self, output):
+                self._outputs_to_remove.append(output)
+
             def add_output(self, output):
                 self._outputs_to_add.append(output)
 
@@ -236,11 +249,16 @@ class OnnxModel:
                     onnx_model.graph.initializer.remove(x.proto())
                 for x in self._nodes_to_remove:
                     onnx_model.graph.node.remove(x.proto())
+                for x in self._inputs_to_remove:
+                    onnx_model.graph.input.remove(x)
+                for x in self._outputs_to_remove:
+                    onnx_model.graph.output.remove(x)
 
                 onnx_model.graph.initializer.extend(
                     self._initializers_to_add)
                 onnx_model.graph.node.extend(self._nodes_to_add)
 
+                onnx_model.graph.input.extend(self._inputs_to_add)
                 onnx_model.graph.output.extend(self._outputs_to_add)
 
                 e = Extractor(onnx_model)
