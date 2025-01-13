@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
 import sys
 import argparse
-import logging
 from pathlib import Path
 
 import onnx
-
-logger = logging.getLogger(__name__)
 
 
 def parse_args(args=sys.argv[1:]):
@@ -22,7 +19,6 @@ def parse_args(args=sys.argv[1:]):
 
 def main():
     options = parse_args()
-    logging.basicConfig(level=logging.INFO)
 
     model = onnx.load(options.model)
     inodes = options.inodes
