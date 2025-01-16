@@ -3,7 +3,7 @@ import sys
 import argparse
 from pathlib import Path
 
-import onnx
+from onnxutils.onnx import OnnxModel
 
 
 def parse_args(args=sys.argv[1:]):
@@ -20,20 +20,13 @@ def parse_args(args=sys.argv[1:]):
 def main():
     options = parse_args()
 
-    model = onnx.load(options.model)
-    inodes = options.inodes
-    if not inodes:
-        inodes = [x.name for x in model.graph.input]
-    onodes = options.onodes
-    if not onodes:
-        onodes = [x.name for x in model.graph.output]
-
-    e = onnx.utils.Extractor(model)
-    extracted_model = e.extract_model(inodes, onodes)
+    onnx_model = OnnxModel.from_file(options.model)
+    onnx_model = onnx_model.extract(
+        options.inodes, options.onodes or onnx_model.output_names())
 
     output = Path(options.output)
     output.parent.mkdir(parents=True, exist_ok=True)
-    onnx.save(extracted_model, output)
+    onnx_model.save(output)
 
 
 if __name__ == '__main__':
