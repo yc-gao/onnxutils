@@ -2,6 +2,17 @@ import torch
 
 from torch.ao.quantization.observer import ObserverBase
 from torch.ao.quantization.fake_quantize import FakeQuantizeBase
+from torch.ao.quantization.fx.tracer import QuantizationTracer
+
+
+def symbolic_trace(
+        m,
+        concrete_args=None,
+        skipped_module_names=[],
+        skipped_module_classes=[]):
+    tracer = QuantizationTracer(skipped_module_names, skipped_module_classes)
+    graph = tracer.trace(m, concrete_args)
+    return torch.fx.GraphModule(m, graph)
 
 
 class QuantizerBase:
@@ -32,6 +43,10 @@ class QuantizerBase:
             if node.op != 'call_module':
                 continue
 
+            device = next(iter(graph_module.parameters())).device
+            parent_name, _ = self.partition_module_name(node.target)
+            parent_mod = graph_module.get_submodule(parent_name)
+
             mod = graph_module.get_submodule(node.target)
             if not isinstance(mod, (ObserverBase, FakeQuantizeBase)):
                 continue
@@ -60,10 +75,6 @@ class QuantizerBase:
                 qparams['ch_axis'] = mod.ch_axis
             else:
                 raise NotImplementedError
-
-            device = next(iter(graph_module.parameters())).device
-            parent_name, _ = self.partition_module_name(node.target)
-            parent_mod = graph_module.get_submodule(parent_name)
 
             with graph_module.graph.inserting_before(node):
                 op_args = [node.args[0]]
