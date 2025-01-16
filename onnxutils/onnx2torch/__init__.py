@@ -1,4 +1,4 @@
-from .converter import convert
+from .converter import convert, normalize_module_name
 from .registry import converter
 
 from . import activations

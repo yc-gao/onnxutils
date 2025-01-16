@@ -3,6 +3,5 @@
     --optim convert-shape-to-initializer \
     --optim onnx-simplifier \
     --optim convert-shape-to-initializer \
-    --optim split-conv-bias-to-bn \
     -o examples/unimodel/unimodel.optimized.onnx \
     examples/unimodel/unimodel.onnx
