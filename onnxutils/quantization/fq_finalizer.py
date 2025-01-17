@@ -3,7 +3,7 @@ import torch
 from torch.ao.quantization.observer import ObserverBase
 from torch.ao.quantization.fake_quantize import FakeQuantizeBase
 
-from .pass import BasePass
+from .pass_manager import BasePass
 
 
 class FakeQuantizeFinalizer(BasePass):
