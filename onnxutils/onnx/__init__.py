@@ -2,9 +2,8 @@ from .onnx_tensor import OnnxTensor
 from .onnx_node import OnnxNode
 from .onnx_model import OnnxModel
 
-from .registry import optimizer, find_optimizer
+from .pass import optimizer, find_optimizer, apply_optimizers
 from .dag_matcher import DagMatcher
-from .utils import apply_optimizers
 
 from . import onnx_simplifier
 from . import convert_constant_to_initializer

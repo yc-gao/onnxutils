@@ -3,7 +3,7 @@ import numpy as np
 from .onnx_model import OnnxModel
 from .onnx_tensor import OnnxTensor
 
-from .registry import optimizer
+from .pass import optimizer
 from .dag_matcher import DagMatcher
 
 dag_pattern = DagMatcher({

@@ -3,7 +3,7 @@ import numpy as np
 
 from .onnx_model import OnnxModel
 
-from .registry import optimizer
+from .pass import optimizer
 
 
 @optimizer('split-conv-bias-to-bn')

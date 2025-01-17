@@ -12,3 +12,10 @@ def optimizer(name):
 
 def find_optimizer(name):
     return __name2optimizer.get(name, None)
+
+
+def apply_optimizers(onnx_model, optimizers):
+    for name in optimizers:
+        optimizer = find_optimizer(name)
+        onnx_model = optimizer.apply(onnx_model)
+    return onnx_model
