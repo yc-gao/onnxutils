@@ -1,4 +1,4 @@
-from .onnx_model import OnnxModel
+from .onnx_model import OnnxModel, OnnxTensor
 
 from .pass_manager import optimizer
 
@@ -14,8 +14,9 @@ class _:
                     continue
                 if node.outputs()[0] in output_names:
                     continue
+
                 val = node.attributes().get('value', None)
-                if val is None:
+                if not isinstance(val, OnnxTensor):
                     continue
 
                 tensor = val.proto()

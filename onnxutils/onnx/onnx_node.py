@@ -1,4 +1,4 @@
-from onnx.onnx_ml_pb2 import NodeProto, AttributeProto
+from onnx import NodeProto, AttributeProto
 
 from .onnx_tensor import OnnxTensor
 

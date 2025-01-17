@@ -1,7 +1,7 @@
+import onnx
 import numpy as np
 
 from .onnx_model import OnnxModel
-from .onnx_node import OnnxTensor
 
 from .pass_manager import optimizer
 
@@ -27,8 +27,10 @@ class _:
                 if any(x == -1 for x in shape):
                     continue
 
-                sess.add_initializer(OnnxTensor.from_numpy(
-                    np.array(shape, dtype=np.int64), node.outputs()[0]).proto())
+                sess.add_initializer(
+                    onnx.numpy_helper.from_array(
+                        np.array(shape, dtype=np.int64),
+                        node.outputs()[0]))
                 sess.remove_node(node)
 
         return onnx_model
