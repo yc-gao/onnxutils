@@ -3,7 +3,7 @@ from .onnx_node import OnnxNode
 from .onnx_model import OnnxModel
 
 from .dag_matcher import DagMatcher
-from .pass_manager import optimizer, find_optimizer, apply_optimizers
+from .pass_manager import optimizer, find_optimizer, apply_optimizers, list_optimizers
 
 from . import onnx_simplifier
 from . import convert_constant_to_initializer

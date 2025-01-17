@@ -19,3 +19,7 @@ def apply_optimizers(onnx_model, optimizers):
         optimizer = find_optimizer(name)
         onnx_model = optimizer.apply(onnx_model)
     return onnx_model
+
+
+def list_optimizers():
+    return __name2optimizer.keys()
