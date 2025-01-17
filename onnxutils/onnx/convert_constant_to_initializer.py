@@ -1,10 +1,10 @@
 from .onnx_model import OnnxModel
 
-from .pass import optimizer
+from .pass_manager import optimizer
 
 
 @optimizer('convert-constant-to-initializer')
-class OnnxSimplifier:
+class _:
     @staticmethod
     def apply(onnx_model: OnnxModel) -> OnnxModel:
         output_names = onnx_model.output_names()

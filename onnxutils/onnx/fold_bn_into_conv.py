@@ -3,7 +3,7 @@ import numpy as np
 
 from .onnx_model import OnnxModel
 
-from .pass import optimizer
+from .pass_manager import optimizer
 from .dag_matcher import DagMatcher
 
 dag_pattern = DagMatcher({
@@ -19,7 +19,7 @@ dag_pattern = DagMatcher({
 
 
 @optimizer('fold-bn-into-conv')
-class FoldConstant:
+class _:
     @staticmethod
     def apply(onnx_model: OnnxModel) -> OnnxModel:
         with onnx_model.session() as sess:

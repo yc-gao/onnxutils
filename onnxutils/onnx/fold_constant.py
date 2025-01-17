@@ -2,7 +2,7 @@ import onnx
 
 from .onnx_model import OnnxModel
 
-from .pass import optimizer
+from .pass_manager import optimizer
 
 
 @optimizer('fold-constant')

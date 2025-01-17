@@ -3,7 +3,7 @@ import numpy as np
 from .onnx_model import OnnxModel
 from .onnx_node import OnnxTensor
 
-from .pass import optimizer
+from .pass_manager import optimizer
 
 
 @optimizer('convert-shape-to-initializer')

@@ -3,11 +3,11 @@ import numpy as np
 
 from .onnx_model import OnnxModel
 
-from .pass import optimizer
+from .pass_manager import optimizer
 
 
 @optimizer('split-conv-bias-to-bn')
-class FoldConstant:
+class _:
     @staticmethod
     def apply(onnx_model: OnnxModel) -> OnnxModel:
         with onnx_model.session() as sess:

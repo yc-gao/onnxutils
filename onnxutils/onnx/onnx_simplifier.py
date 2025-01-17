@@ -1,10 +1,10 @@
 from .onnx_model import OnnxModel
 
-from .pass import optimizer
+from .pass_manager import optimizer
 
 
 @optimizer('onnx-simplifier')
-class OnnxSimplifier:
+class _:
     @staticmethod
     def apply(onnx_model: OnnxModel) -> OnnxModel:
         from onnxsim.onnx_simplifier import simplify
