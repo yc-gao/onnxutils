@@ -5,12 +5,6 @@ import torch
 from onnxutils.onnx import OnnxNode
 
 
-class OperationDescription(NamedTuple):
-    domain: str
-    operation_type: str
-    version: int
-
-
 class OnnxToTorchModule:
     pass
 

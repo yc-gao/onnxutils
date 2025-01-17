@@ -1,17 +1,17 @@
-__name2optimizer = {}
+_optimizer_registry = {}
 
 
 def optimizer(name):
     def wrapper(cls):
-        if name in __name2optimizer:
+        if name in _optimizer_registry:
             raise RuntimeError(f"optimizer '{name}' already registered")
-        __name2optimizer[name] = cls
+        _optimizer_registry[name] = cls
         return cls
     return wrapper
 
 
 def find_optimizer(name):
-    return __name2optimizer.get(name, None)
+    return _optimizer_registry.get(name, None)
 
 
 def apply_optimizers(onnx_model, optimizers):
@@ -22,4 +22,4 @@ def apply_optimizers(onnx_model, optimizers):
 
 
 def list_optimizers():
-    return __name2optimizer.keys()
+    return _optimizer_registry.keys()
