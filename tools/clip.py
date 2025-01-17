@@ -21,8 +21,12 @@ def main():
     options = parse_args()
 
     onnx_model = OnnxModel.from_file(options.model)
+
+    inodes = options.inodes
+    onodes = options.onodes or onnx_model.output_names()
+
     onnx_model = onnx_model.extract(
-        options.inodes, options.onodes or onnx_model.output_names())
+        inodes, onodes)
 
     output = Path(options.output)
     output.parent.mkdir(parents=True, exist_ok=True)

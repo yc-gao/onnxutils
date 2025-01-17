@@ -1,4 +1,5 @@
 import os
+import warnings
 import uuid
 from collections import Counter
 
@@ -161,8 +162,47 @@ class OnnxModel:
         self.reindex(model)
 
     def extract(self, input_names: list[str], output_names: list[str]):
-        e = Extractor(self.proto())
-        return OnnxModel(e.extract_model(input_names, output_names))
+        inames = set(input_names)
+        onames = set(output_names)
+
+        tensor_visited = set()
+
+        nodes = []
+        inputs = []
+        outputs = [self.get_vinfo_by_name(x) for x in onames]
+        initializers = []
+
+        def dfs(oname, node_name=''):
+            if oname in tensor_visited:
+                return
+            tensor_visited.add(oname)
+            if oname in inames:
+                inputs.append(self.get_vinfo_by_name(oname))
+            elif (input := self.get_input_by_name(oname)) is not None:
+                inputs.append(input)
+            elif (initializer := self.get_initializer_by_name(oname)) is not None:
+                initializers.append(initializer.proto())
+            elif (node := self.get_node_by_output(oname)) is not None:
+                for iname in node.inputs():
+                    dfs(iname, node.name())
+                nodes.append(node.proto())
+            else:
+                warnings.warn(f"unmatched tensor {node_name}:{oname}")
+
+        for oname in onames:
+            dfs(oname)
+
+        model_pb = onnx.helper.make_model(
+            onnx.helper.make_graph(
+                nodes,
+                self._proto.graph.name,
+                inputs,
+                outputs,
+                initializers,
+                doc_string=self._proto.graph.doc_string
+            )
+        )
+        return OnnxModel(model_pb)
 
     def session(self):
         class Session:
