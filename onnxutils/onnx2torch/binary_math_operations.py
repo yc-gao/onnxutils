@@ -6,7 +6,7 @@ from torch import nn
 from onnxutils.onnx import OnnxModel, OnnxNode, OnnxTensor
 
 from .registry import converter
-from .utils import OnnxToTorchModule, OperationConverterResult, onnx_mapping_from_node
+from .utils import OnnxToTorchModule, OperationConverterResult, OnnxMapping
 
 func_mapping = {
     'Add': torch.add,
@@ -77,5 +77,8 @@ def _(onnx_node: OnnxNode, onnx_model: OnnxModel) -> OperationConverterResult:
 
     return OperationConverterResult(
         torch_module=TorchBinaryOp(func_mapping[op_type]),
-        onnx_mapping=onnx_mapping_from_node(onnx_node),
+        onnx_mapping=OnnxMapping(
+            inputs=onnx_node.inputs(),
+            outputs=onnx_node.outputs(),
+        ),
     )

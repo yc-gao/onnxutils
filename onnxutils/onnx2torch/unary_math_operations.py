@@ -6,7 +6,7 @@ from torch import nn
 from onnxutils.onnx import OnnxModel, OnnxNode
 
 from .registry import converter
-from .utils import OnnxToTorchModule, OperationConverterResult, onnx_mapping_from_node
+from .utils import OnnxToTorchModule, OperationConverterResult, OnnxMapping
 
 func_mapping = {
     'Abs': torch.abs,
@@ -42,5 +42,8 @@ class TorchUnaryOp(nn.Module, OnnxToTorchModule):
 def _(onnx_node: OnnxNode, onnx_model: OnnxModel) -> OperationConverterResult:
     return OperationConverterResult(
         torch_module=TorchUnaryOp(func_mapping[onnx_node.op_type()]),
-        onnx_mapping=onnx_mapping_from_node(onnx_node),
+        onnx_mapping=OnnxMapping(
+            inputs=onnx_node.inputs(),
+            outputs=onnx_node.outputs(),
+        ),
     )

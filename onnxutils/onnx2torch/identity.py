@@ -4,7 +4,7 @@ from torch import nn
 from onnxutils.onnx import OnnxModel, OnnxNode
 
 from .registry import converter
-from .utils import OnnxToTorchModule, OperationConverterResult, onnx_mapping_from_node
+from .utils import OnnxToTorchModule, OperationConverterResult, OnnxMapping
 
 
 class TorchIdentity(nn.Module, OnnxToTorchModule):
@@ -19,5 +19,8 @@ class TorchIdentity(nn.Module, OnnxToTorchModule):
 def _(onnx_node: OnnxNode, onnx_model: OnnxModel) -> OperationConverterResult:  # pylint: disable=unused-argument
     return OperationConverterResult(
         torch_module=TorchIdentity(),
-        onnx_mapping=onnx_mapping_from_node(onnx_node),
+        onnx_mapping=OnnxMapping(
+            inputs=onnx_node.inputs(),
+            outputs=onnx_node.outputs(),
+        ),
     )

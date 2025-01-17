@@ -4,7 +4,7 @@ from torch import nn
 from onnxutils.onnx import OnnxModel, OnnxNode
 
 from .registry import converter
-from .utils import OperationConverterResult, onnx_mapping_from_node
+from .utils import OperationConverterResult, OnnxMapping
 
 op_mapping = {
     1: nn.MaxPool1d,
@@ -38,5 +38,8 @@ def _(onnx_node: OnnxNode, onnx_model: OnnxModel) -> OperationConverterResult:  
     )
     return OperationConverterResult(
         torch_module=torch_module,
-        onnx_mapping=onnx_mapping_from_node(onnx_node),
+        onnx_mapping=OnnxMapping(
+            inputs=onnx_node.inputs(),
+            outputs=onnx_node.outputs(),
+        ),
     )

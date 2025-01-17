@@ -2,7 +2,6 @@ from typing import Tuple
 from typing import NamedTuple
 
 import torch
-from onnxutils.onnx import OnnxNode
 
 
 class OnnxToTorchModule:
@@ -17,10 +16,3 @@ class OnnxMapping(NamedTuple):
 class OperationConverterResult(NamedTuple):
     torch_module: torch.nn.Module
     onnx_mapping: OnnxMapping
-
-
-def onnx_mapping_from_node(onnx_node: OnnxNode) -> OnnxMapping:
-    return OnnxMapping(
-        inputs=onnx_node.inputs(),
-        outputs=onnx_node.outputs(),
-    )

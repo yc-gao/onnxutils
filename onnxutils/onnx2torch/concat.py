@@ -5,7 +5,7 @@ from torch import nn
 from onnxutils.onnx import OnnxModel, OnnxNode
 
 from .registry import converter
-from .utils import OnnxToTorchModule, OperationConverterResult, onnx_mapping_from_node
+from .utils import OnnxToTorchModule, OperationConverterResult, OnnxMapping
 
 
 class TorchConcat(nn.Module, OnnxToTorchModule):
@@ -22,5 +22,8 @@ def _(onnx_node: OnnxNode, onnx_model: OnnxModel) -> OperationConverterResult:  
     axis = onnx_node.attributes().get('axis')
     return OperationConverterResult(
         torch_module=TorchConcat(axis),
-        onnx_mapping=onnx_mapping_from_node(onnx_node),
+        onnx_mapping=OnnxMapping(
+            inputs=onnx_node.inputs(),
+            outputs=onnx_node.outputs(),
+        ),
     )
