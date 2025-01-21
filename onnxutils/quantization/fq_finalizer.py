@@ -3,37 +3,57 @@ import torch
 from torch.ao.quantization.observer import ObserverBase
 from torch.ao.quantization.fake_quantize import FakeQuantizeBase
 
-from .pass_manager import BasePass
+
+def get_module(gm: torch.fx.GraphModule, node: torch.fx.Node):
+    if node.op != 'call_module':
+        return None
+    return gm.get_submodule(node.target)
 
 
-class FakeQuantizeFinalizer(BasePass):
+def get_new_attr_name_with_prefix(
+        module: torch.nn.Module,
+        prefix: str,
+        idx: int = 0):
+    prefix = prefix.replace(".", "_")
+
+    while True:
+        attr_name = f"{prefix}{idx}"
+        if not hasattr(module, attr_name):
+            break
+        idx += 1
+    return attr_name
+
+
+def partition_module_name(target: str):
+    *p, r = target.rsplit('.', 1)
+    return '.'.join(p), r
+
+
+class FakeQuantizeFinalizer:
     @staticmethod
-    def apply(graph_module: torch.fx.GraphModule):
-        for node in graph_module.graph.nodes:
-            fq_mod = FakeQuantizeFinalizer.get_module_of_node(
-                graph_module,
-                node,
-                (ObserverBase, FakeQuantizeBase)
-            )
-            if fq_mod is None:
+    def apply(gm: torch.fx.GraphModule):
+        for node in gm.graph.nodes:
+            maybe_fq_mod = get_module(gm, node)
+            if maybe_fq_mod is None:
+                continue
+            if not isinstance(maybe_fq_mod, (ObserverBase, FakeQuantizeBase)):
                 continue
 
-            device = next(iter(graph_module.parameters())).device
-            parent_name, _ = FakeQuantizeFinalizer.partition_module_name(
-                node.target)
-            parent_mod = graph_module.get_submodule(parent_name)
+            parent_name, _ = partition_module_name(node.target)
+            parent_mod = gm.get_submodule(parent_name)
+            device = next(iter(gm.parameters())).device
 
-            qscheme = fq_mod.qscheme
-            quant_min = fq_mod.quant_min
-            quant_max = fq_mod.quant_max
-            scale, zero_point = fq_mod.calculate_qparams()
+            qscheme = maybe_fq_mod.qscheme
+            quant_min = maybe_fq_mod.quant_min
+            quant_max = maybe_fq_mod.quant_max
+            scale, zero_point = maybe_fq_mod.calculate_qparams()
 
             qparams = {
                 'qscheme': qscheme,
                 'quant_min': quant_min,
                 'quant_max': quant_max,
-                'scale': scale.to(torch.float),
-                'zero_point': zero_point.to(torch.int32),
+                'scale': scale.to(torch.float32),
+                'zero_point': zero_point.to(torch.int64),
             }
 
             if qscheme in (
@@ -44,11 +64,11 @@ class FakeQuantizeFinalizer(BasePass):
                     torch.per_channel_affine,
                     torch.per_channel_symmetric):
                 op_func = torch.fake_quantize_per_channel_affine
-                qparams['ch_axis'] = fq_mod.ch_axis
+                qparams['ch_axis'] = maybe_fq_mod.ch_axis
             else:
                 raise NotImplementedError
 
-            with graph_module.graph.inserting_before(node):
+            with gm.graph.inserting_before(node):
                 op_args = [node.args[0]]
 
                 for name in ['scale', 'zero_point',
@@ -64,11 +84,11 @@ class FakeQuantizeFinalizer(BasePass):
                             if isinstance(value, torch.Tensor)
                             else torch.tensor(value, device=device)
                         )
-                        attr_name = FakeQuantizeFinalizer.get_new_attr_name_with_prefix(
+                        attr_name = get_new_attr_name_with_prefix(
                             parent_mod,
                             name)
                         parent_mod.register_buffer(attr_name, new_value)
-                        attr_node = graph_module.graph.create_node(
+                        attr_node = gm.graph.create_node(
                             'get_attr',
                             f"{parent_name}.{attr_name}"
                             if parent_name else attr_name
@@ -77,11 +97,11 @@ class FakeQuantizeFinalizer(BasePass):
                     else:
                         op_args.append(value)
 
-                op_node = graph_module.graph.create_node(
+                op_node = gm.graph.create_node(
                     'call_function',
                     op_func,
                 )
                 node.replace_all_uses_with(op_node)
-                graph_module.graph.erase_node(node)
+                gm.graph.erase_node(node)
                 op_node.args = tuple(op_args)
-        return torch.fx.GraphModule(graph_module, graph_module.graph)
+        return torch.fx.GraphModule(gm, gm.graph)
