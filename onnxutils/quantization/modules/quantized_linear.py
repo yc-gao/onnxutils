@@ -6,12 +6,12 @@ class QuantizedLinear(torch.nn.Linear):
     FLOAT_MODULE = torch.nn.Linear
 
     def __init__(self,
+                 fq_cls,
                  in_features,
                  out_features,
                  bias=True,
                  device=None,
-                 dtype=None,
-                 fq_cls=None):
+                 dtype=None):
         super().__init__(
             in_features,
             out_features,
@@ -42,12 +42,12 @@ class QuantizedLinear(torch.nn.Linear):
     @staticmethod
     def from_float(float_module, fq_cls):
         new_mod = QuantizedLinear(
+            fq_cls,
             float_module.in_features,
             float_module.out_features,
             float_module.bias is not None,
             float_module.weight.device,
             float_module.weight.dtype,
-            fq_cls
         )
 
         new_mod.weight = float_module.weight
