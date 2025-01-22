@@ -39,9 +39,9 @@ class QuantizedLinear(torch.nn.Linear):
 
         return new_mod
 
-    @staticmethod
-    def from_float(float_module, fq_cls):
-        new_mod = QuantizedLinear(
+    @classmethod
+    def from_float(cls, float_module, fq_cls):
+        new_mod = cls(
             fq_cls,
             float_module.in_features,
             float_module.out_features,

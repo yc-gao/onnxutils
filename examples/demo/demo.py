@@ -5,17 +5,17 @@ import torch
 import torch.nn as nn
 from torch.ao.quantization.observer import PerChannelMinMaxObserver
 
-from onnxutils.quantization.modules import QuantizedLinear
+from onnxutils.quantization.modules import QuantizedConv2d
 from onnxutils.quantization.fake_quantize import FakeQuantize
 
 
 class M(nn.Module):
     def __init__(self) -> None:
         super().__init__()
-        self.linear = nn.Linear(3, 3)
+        self.conv = nn.Conv2d(3, 3, 3, padding=1)
 
     def forward(self, x):
-        x = self.linear(x)
+        x = self.conv(x)
         return x
 
 
@@ -27,12 +27,12 @@ def parse_options():
 
 def main():
     options = parse_options()
-    torch_input = (torch.randn(1, 3), )
+    torch_input = (torch.randn(1, 3, 224, 224), )
 
     fq_cls = FakeQuantize.with_args(
         observer=PerChannelMinMaxObserver)
     m = M()
-    m.linear = QuantizedLinear.from_float(m.linear, fq_cls)
+    m.conv = QuantizedConv2d.from_float(m.conv, fq_cls)
     m(*torch_input)
 
     for module in m.modules():
