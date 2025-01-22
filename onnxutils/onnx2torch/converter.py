@@ -17,7 +17,11 @@ class InitializersContainer(torch.nn.Module):
 
 
 def normalize_module_name(name, domain='', op_type=''):
-    return (f'{domain}/' + (name.replace('.', '/') or op_type)).lstrip('/')
+    name = name or op_type
+    name = name.replace('.', '_')
+    name = name.replace('/', '_')
+    name = name.lstrip('/')
+    return name
 
 
 def convert(
