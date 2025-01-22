@@ -7,6 +7,7 @@ setup(
     install_requires=[
         'numpy',
         'onnx',
+        'onnxoptimizer',
         'onnxsim',
     ],
     packages=find_packages(),
