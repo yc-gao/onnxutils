@@ -24,6 +24,21 @@ class QuantizedLinear(torch.nn.Linear):
     def forward(self, X):
         return F.linear(X, self.weight_fake_quant(self.weight), self.bias)
 
+    def to_float(self):
+        new_mod = self.FLOAT_MODULE(
+            self.in_features,
+            self.out_features,
+            self.bias is not None,
+            self.weight.device,
+            self.weight.dtype,
+        )
+
+        new_mod.weight = self.weight
+        if new_mod.bias is not None:
+            new_mod.bias = self.bias
+
+        return new_mod
+
     @staticmethod
     def from_float(float_module, fq_cls):
         new_mod = QuantizedLinear(
