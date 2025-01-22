@@ -12,7 +12,7 @@ from onnxutils.quantization.fake_quantize import FakeQuantize
 class M(nn.Module):
     def __init__(self) -> None:
         super().__init__()
-        self.conv = nn.Conv2d(3, 3, 3, padding=1)
+        self.conv = nn.Conv2d(3, 5, 3, padding=1)
 
     def forward(self, x):
         x = self.conv(x)
