@@ -1,5 +1,4 @@
-from .onnx_model import OnnxModel, OnnxTensor
-
+from .onnx_model import OnnxModel
 from .pass_manager import optimizer
 
 
@@ -7,21 +6,9 @@ from .pass_manager import optimizer
 class _:
     @staticmethod
     def apply(onnx_model: OnnxModel) -> OnnxModel:
-        output_names = onnx_model.output_names()
-        with onnx_model.session() as sess:
-            for node in onnx_model.nodes():
-                if node.op_type() != 'Constant':
-                    continue
-                if node.outputs()[0] in output_names:
-                    continue
+        import onnxoptimizer
+        return OnnxModel(
+            onnxoptimizer.optimize(
+                onnx_model.proto(),
+                passes=['extract_constant_to_initializer']))
 
-                val = node.attributes().get('value', None)
-                if not isinstance(val, OnnxTensor):
-                    continue
-
-                tensor = val.proto()
-                tensor.name = node.outputs()[0]
-                sess.add_initializer(tensor)
-                sess.remove_node(node)
-
-        return onnx_model
