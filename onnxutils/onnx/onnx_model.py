@@ -192,16 +192,13 @@ class OnnxModel:
         for oname in onames:
             dfs(oname)
 
-        model_pb = onnx.helper.make_model(
-            onnx.helper.make_graph(
-                nodes,
-                self._proto.graph.name,
-                inputs,
-                outputs,
-                initializers,
-                doc_string=self._proto.graph.doc_string
-            )
-        )
+        model_pb = self.clone().proto()
+        model_pb.ClearField('graph')
+        model_pb.graph.name = self._proto.graph.name
+        model_pb.graph.node.extend(nodes)
+        model_pb.graph.input.extend(inputs)
+        model_pb.graph.output.extend(outputs)
+        model_pb.graph.initializer.extend(initializers)
         return OnnxModel(model_pb)
 
     def session(self):
