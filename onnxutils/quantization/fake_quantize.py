@@ -23,10 +23,10 @@ class FakeQuantizeBase(ABC, torch.nn.Module):
         self.observer_enabled = observer_enabled
         self.fake_quant_enabled = fake_quant_enabled
 
-    def enable_observer_enabled(self):
+    def enable_observer(self):
         self.observer_enabled = True
 
-    def disable_observer_enabled(self):
+    def disable_observer(self):
         self.observer_enabled = False
 
     def enable_fake_quant(self):
@@ -105,6 +105,7 @@ class FakeQuantize(FakeQuantizeBase):
 class FixedFakeQuantize(FakeQuantize):
     def __init__(self, observer) -> None:
         super().__init__(observer)
+        self.disable_observer()
 
         self.scale = self.activation_post_process.scale
         self.zero_point = self.activation_post_process.zero_point
