@@ -5,9 +5,10 @@ import torch
 
 
 class FakeQuantizeBase(ABC, torch.nn.Module):
-    per_channel_qscheme = (torch.per_tensor_symmetric, torch.per_tensor_affine)
-    per_tensor_qscheme = (torch.per_channel_symmetric,
-                          torch.per_channel_affine)
+    per_channel_qscheme = (torch.per_channel_symmetric,
+                           torch.per_channel_affine)
+    per_tensor_qscheme = (torch.per_tensor_symmetric, torch.per_tensor_affine)
+
     symmetric_qscheme = (torch.per_tensor_symmetric,
                          torch.per_channel_symmetric)
 
@@ -88,16 +89,16 @@ class FakeQuantize(FakeQuantizeBase):
                     self.scale,
                     self.zero_point,
                     self.ch_axis,
-                    self.activation_post_process.quant_min,
-                    self.activation_post_process.quant_max,
+                    self.quant_min,
+                    self.quant_max,
                 )
             else:
                 X = torch.fake_quantize_per_tensor_affine(
                     X,
                     self.scale,
                     self.zero_point,
-                    self.activation_post_process.quant_min,
-                    self.activation_post_process.quant_max,
+                    self.quant_min,
+                    self.quant_max,
                 )
         return X
 
