@@ -3,7 +3,6 @@ import argparse
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from torch.ao.quantization.observer import PerChannelMinMaxObserver
 
 from onnxutils.quantization.modules import QuantizedLinear
