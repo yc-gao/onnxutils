@@ -166,6 +166,7 @@ class OnnxModel:
         onames = set(output_names)
 
         tensor_visited = set()
+        node_visited = set()
 
         nodes = []
         inputs = []
@@ -183,9 +184,11 @@ class OnnxModel:
             elif (initializer := self.get_initializer_by_name(oname)) is not None:
                 initializers.append(initializer.proto())
             elif (node := self.get_node_by_output(oname)) is not None:
-                for iname in node.inputs():
-                    dfs(iname, node.name())
-                nodes.append(node.proto())
+                if node.name not in node_visited:
+                    for iname in node.inputs():
+                        dfs(iname, node.name())
+                    nodes.append(node.proto())
+                    node_visited.add(node.name)
             else:
                 warnings.warn(f"unmatched tensor {node_name}:{oname}")
 
