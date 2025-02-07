@@ -37,6 +37,8 @@ class DagMatcher:
         properties = ('op_type', 'name')
         for prop in properties:
             if prop in self.pattern:
+                if node is None:
+                    return False
                 val = getattr(node, prop)
                 if callable(val):
                     val = val()
