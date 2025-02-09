@@ -7,13 +7,13 @@ _converter_registry = {}
 
 
 def converter(
-    op_type: str,
+    operation_type: str,
     version: int,
     domain: str = defs.ONNX_DOMAIN,
     force=False,
 ):
     def deco(converter):
-        op_key = (domain, op_type, version)
+        op_key = (domain, operation_type, version)
         if op_key in _converter_registry:
             if force:
                 warnings.warn(
@@ -27,11 +27,11 @@ def converter(
 
 
 def find_converter(
-    op_type: str,
+    operation_type: str,
     version: int,
     domain: str = defs.ONNX_DOMAIN,
 ):
-    op_key = (domain, op_type, version)
+    op_key = (domain, operation_type, version)
     converter = _converter_registry.get(op_key, None)
     if converter is None:
         raise NotImplementedError(
