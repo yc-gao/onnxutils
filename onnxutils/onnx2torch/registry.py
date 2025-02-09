@@ -31,6 +31,16 @@ def find_converter(
     version: int,
     domain: str = defs.ONNX_DOMAIN,
 ):
+
+    try:
+        version = defs.get_schema(
+            operation_type,
+            domain=domain,
+            max_inclusive_version=version,
+        ).since_version
+    except (RuntimeError, defs.SchemaError):
+        pass
+
     op_key = (domain, operation_type, version)
     converter = _converter_registry.get(op_key, None)
     if converter is None:

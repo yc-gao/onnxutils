@@ -73,5 +73,6 @@ def _(onnx_node: OnnxNode, onnx_model: OnnxModel) -> OperationConverterResult:
         onnx_mapping=OnnxMapping(
             inputs=onnx_node.inputs()[:1],
             outputs=onnx_node.outputs(),
+            params=onnx_node.inputs()[1:],
         )
     )

@@ -32,7 +32,23 @@ def _(onnx_node: OnnxNode, onnx_model: OnnxModel) -> OperationConverterResult:
 
     weight = onnx_model.get_initializer_by_name(
         onnx_node.inputs()[1]).to_torch()
-    bias = onnx_model.get_initializer_by_name(onnx_node.inputs()[2]).to_torch()
+    bias = None
+    if len(onnx_node.inputs()) >= 3:
+        bias = onnx_model.get_initializer_by_name(onnx_node.inputs()[2]).to_torch()
+
+    if alpha == 1 and beta == 1 and transA == 0 and transB == 1:
+        torch_module = nn.Linear(weight.shape[1], weight.shape[0], bias=bias is not None)
+        torch_module.weight = weight
+        if bias is not None:
+            torch_module.bias = bias
+        return OperationConverterResult(
+            torch_module=torch_module,
+            onnx_mapping=OnnxMapping(
+                inputs=onnx_node.inputs()[:1],
+                outputs=onnx_node.outputs(),
+                params=onnx_node.inputs()[1:],
+            ),
+        )
 
     if transB:
         weight = weight.T

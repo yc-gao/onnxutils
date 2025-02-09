@@ -8,9 +8,13 @@ class OnnxToTorchModule:
     pass
 
 
-class OnnxMapping(NamedTuple):
-    inputs: Tuple[str, ...]
-    outputs: Tuple[str, ...]
+class OnnxMapping:
+    def __init__(self, **kwargs):
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+    # inputs: Tuple[str, ...]
+    # outputs: Tuple[str, ...]
+    # params: Tuple[str, ...]
 
 
 class OperationConverterResult(NamedTuple):
