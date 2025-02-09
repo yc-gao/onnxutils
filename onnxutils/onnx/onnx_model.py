@@ -149,7 +149,7 @@ class OnnxModel:
             if node.name() in node_visited:
                 return
             node_visited.add(node.name())
-            for input_name in do_sort(node.inputs()):
+            for input_name in node.inputs():
                 dfs(self.get_node_by_output(input_name))
             sorted_nodes.append(node)
 
