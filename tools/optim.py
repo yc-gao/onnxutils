@@ -18,6 +18,7 @@ def main():
     onnx_model = OnnxModel.from_file(options.model)
     onnx_model = apply_optimizers(onnx_model, options.optim)
 
+    onnx_model.topological_sort()
     with onnx_model.session() as sess:
         for node in onnx_model.proto().graph.node:
             if node.name == '':

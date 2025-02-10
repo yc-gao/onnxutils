@@ -24,3 +24,4 @@ from . import fold_bn_into_conv
 from . import fold_bn_into_gemm
 
 from . import split_conv_bias_to_bn
+from . import convert_qdq_to_fq

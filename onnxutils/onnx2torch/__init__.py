@@ -36,3 +36,4 @@ from .converter import reduce_max
 from .converter import cum_sum
 from .converter import depth_to_space
 from .converter import global_avg_pool
+from .converter import fake_qdq
