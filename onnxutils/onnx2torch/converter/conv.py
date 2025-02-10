@@ -33,7 +33,7 @@ class TorchConv(nn.Module, OnnxToTorchModule):
         self.strides = strides
         self.f = func
 
-    def forward(self, input, weight, bias):
+    def forward(self, input, weight, bias=None):
         return self.f(input, weight, bias, self.strides, self.pads, self.dilations, self.group)
 
 

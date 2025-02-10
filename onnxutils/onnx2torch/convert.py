@@ -73,15 +73,18 @@ def convert(
                     buffer_idx = sum(
                         1 for _ in root_initializer.buffers())
                     buffer_name = f'onnx_initializer_{buffer_idx}'
+                    initializer_value = onnx_model.get_initializer_by_name(
+                        value_name).to_torch()
+                    initializer_value.onnx_mapping = OnnxMapping(
+                        name=value_name)
                     root_initializer.add_initializer(
                         buffer_name,
-                        onnx_model.get_initializer_by_name(
-                            value_name).to_torch(),
+                        initializer_value,
                     )
                     torch_nodes[value_name] = torch_graph.get_attr(
                         f'initializers.{buffer_name}')
                 args.append(torch_nodes[value_name])
-            elif onnx_input_node:=onnx_model.get_node_by_output(value_name):
+            elif onnx_input_node := onnx_model.get_node_by_output(value_name):
                 torch_input_node = torch_nodes[onnx_input_node.name()]
                 if len(onnx_input_node.outputs()) > 1:
                     index = onnx_input_node.outputs().index(value_name)
@@ -113,8 +116,8 @@ def convert(
     setattr(torch_model,
             'onnx_mapping',
             OnnxMapping(
-                    inputs=onnx_model.input_names(),
-                    outputs=onnx_model.output_names(),
-                )
+                inputs=onnx_model.input_names(),
+                outputs=onnx_model.output_names(),
+            )
             )
     return torch_model
