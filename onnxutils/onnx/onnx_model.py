@@ -81,7 +81,7 @@ class OnnxModel:
         return self._inputs
 
     def input_names(self):
-        return set({x.name for x in self._inputs})
+        return tuple({x.name for x in self._inputs})
 
     def get_input_by_name(self, name):
         return self._name_to_input.get(name, None)
@@ -90,7 +90,7 @@ class OnnxModel:
         return self._outputs
 
     def output_names(self):
-        return set({x.name for x in self._outputs})
+        return tuple({x.name for x in self._outputs})
 
     def get_output_by_name(self, name):
         return self._name_to_output.get(name, None)
