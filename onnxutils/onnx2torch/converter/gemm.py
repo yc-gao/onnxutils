@@ -38,9 +38,9 @@ def _(onnx_node: OnnxNode, onnx_model: OnnxModel) -> OperationConverterResult:
 
     if alpha == 1 and beta == 1 and transA == 0 and transB == 1:
         torch_module = nn.Linear(weight.shape[1], weight.shape[0], bias=bias is not None)
-        torch_module.weight = weight
+        torch_module.weight = nn.Parameter(weight)
         if bias is not None:
-            torch_module.bias = bias
+            torch_module.bias = nn.Parameter(bias)
         return OperationConverterResult(
             torch_module=torch_module,
             onnx_mapping=OnnxMapping(

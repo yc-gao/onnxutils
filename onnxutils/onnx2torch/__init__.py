@@ -4,6 +4,7 @@ from .registry import converter
 from .converter import activations
 from .converter import identity
 from .converter import conv
+from .converter import conv_transpose
 from .converter import binary_math_operations
 from .converter import unary_math_operations
 from .converter import resize
@@ -34,3 +35,4 @@ from .converter import arg_max
 from .converter import reduce_max
 from .converter import cum_sum
 from .converter import depth_to_space
+from .converter import global_avg_pool
