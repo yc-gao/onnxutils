@@ -27,7 +27,7 @@ class _:
     def apply(onnx_model: OnnxModel) -> OnnxModel:
         output_names = set(onnx_model.output_names())
 
-        mutable_tensors = onnx_model.input_names()
+        mutable_tensors = set(onnx_model.input_names())
         mutable_nodes = set()
         for node in onnx_model.nodes():
             if any(x in mutable_tensors for x in node.inputs()):
