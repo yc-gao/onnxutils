@@ -18,6 +18,7 @@ from . import eliminate_flatten
 from . import eliminate_reshape
 from . import eliminate_split
 from . import eliminate_transpose
+from . import eliminate_qdq
 
 from . import fold_constant
 from . import fold_bn_into_conv
