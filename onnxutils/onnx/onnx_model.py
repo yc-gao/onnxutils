@@ -99,7 +99,7 @@ class OnnxModel:
         return self._initializers
 
     def initializer_names(self):
-        return set({x.name for x in self._initializers})
+        return tuple({x.name() for x in self._initializers})
 
     def get_initializer_by_name(self, name) -> OnnxTensor:
         return self._name_to_initializer.get(name, None)
@@ -143,18 +143,19 @@ class OnnxModel:
             arr.sort()
             return arr
 
-        def dfs(node):
+        def dfs(node, output_name=None):
+            # print('node is None', node is None, output_name)
             if node is None:
                 return
             if node.name() in node_visited:
                 return
             node_visited.add(node.name())
             for input_name in node.inputs():
-                dfs(self.get_node_by_output(input_name))
+                dfs(self.get_node_by_output(input_name), input_name)
             sorted_nodes.append(node)
 
         for output_name in do_sort(self.output_names()):
-            dfs(self.get_node_by_output(output_name))
+            dfs(self.get_node_by_output(output_name), output_name)
 
         model = self._proto
         model.graph.ClearField("node")
