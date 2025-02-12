@@ -103,13 +103,52 @@ class FakeQuantize(FakeQuantizeBase):
         return X
 
 
-class FixedFakeQuantize(FakeQuantize):
-    def __init__(self, observer) -> None:
-        super().__init__(observer)
-        self.disable_observer()
+class FixedFakeQuantize(torch.nn.Module):
+    def __init__(
+            self,
+            scale,
+            zero_point,
+            quant_min=0,
+            quant_max=255,
+            ch_axis=0):
+        super().__init__()
 
-        self.scale = self.activation_post_process.scale
-        self.zero_point = self.activation_post_process.zero_point
+        self.scale = scale
+        self.zero_point = zero_point
+
+        self.quant_min = quant_min
+        self.quant_max = quant_max
+        self.ch_axis = ch_axis
+
+        self.is_per_channel = self.scale.size(0) > 1
+        self.fake_quant_enabled = True
+
+    def enable_fake_quant(self):
+        self.fake_quant_enabled = True
+
+    def disable_fake_quant(self):
+        self.fake_quant_enabled = False
 
     def calculate_qparams(self):
         return self.scale, self.zero_point
+
+    def forward(self, X):
+        if self.fake_quant_enabled:
+            if self.is_per_channel:
+                X = torch.fake_quantize_per_channel_affine(
+                    X,
+                    self.scale,
+                    self.zero_point,
+                    self.ch_axis,
+                    self.quant_min,
+                    self.quant_max,
+                )
+            else:
+                X = torch.fake_quantize_per_tensor_affine(
+                    X,
+                    self.scale,
+                    self.zero_point,
+                    self.quant_min,
+                    self.quant_max,
+                )
+        return X
