@@ -33,7 +33,7 @@ class TorchSlice(nn.Module):
 
 @add_converter(op_type='Slice', version=13)
 def _(onnx_node: OnnxNode, _: OnnxModel):
-    torch_module = TorchSlice(),
+    torch_module = TorchSlice()
     onnx_mapping = {
         'inputs': onnx_node.inputs(),
         'outputs': onnx_node.outputs(),

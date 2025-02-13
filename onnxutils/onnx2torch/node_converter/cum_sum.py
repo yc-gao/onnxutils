@@ -27,7 +27,7 @@ def _(onnx_node: OnnxNode, onnx_model: OnnxModel):
     axis = onnx_model.get_initializer_by_name(
         onnx_node.inputs()[1]).to_numpy().item()
 
-    torch_module = TorchCumSum(axis),
+    torch_module = TorchCumSum(axis)
     onnx_mapping = {
         'inputs': onnx_node.inputs()[:1],
         'outputs': onnx_node.outputs(),

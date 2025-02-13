@@ -25,7 +25,7 @@ def _(onnx_node: OnnxNode, _: OnnxModel):
     assert len(axis) == 1, 'not implement'
     axis = axis[0]
 
-    torch_module = TorchReduceMax(axis, keepdims),
+    torch_module = TorchReduceMax(axis, keepdims)
     onnx_mapping = {
         'inputs': onnx_node.inputs(),
         'outputs': onnx_node.outputs(),

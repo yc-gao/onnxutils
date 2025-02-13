@@ -34,7 +34,7 @@ class TorchCast(nn.Module):
 @add_converter(op_type='Cast', version=13)
 def _(onnx_node: OnnxNode, _: OnnxModel):
     dtype = dtype_mapping[onnx_node.attributes().get('to')]
-    torch_module = TorchCast(dtype),
+    torch_module = TorchCast(dtype)
     onnx_mapping = {
         'inputs': onnx_node.inputs(),
         'outputs': onnx_node.outputs(),

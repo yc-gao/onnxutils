@@ -20,7 +20,7 @@ class TorchPermute(nn.Module):
 def _(onnx_node: OnnxNode, _: OnnxModel):
     perm = onnx_node.attributes().get('perm')
 
-    torch_module = TorchPermute(perm),
+    torch_module = TorchPermute(perm)
     onnx_mapping = {
         'inputs': onnx_node.inputs(),
         'outputs': onnx_node.outputs(),

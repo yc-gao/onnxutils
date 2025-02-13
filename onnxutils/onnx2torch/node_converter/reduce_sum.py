@@ -36,7 +36,7 @@ def _(onnx_node: OnnxNode, onnx_model: OnnxModel):
     if axis is not None:
         axis = axis.to_numpy().tolist()
 
-    torch_module = TorchReduceSum(axis, keepdims, noop_with_empty_axes),
+    torch_module = TorchReduceSum(axis, keepdims, noop_with_empty_axes)
     onnx_mapping = {
         'inputs': onnx_node.inputs()[:1],
         'outputs': onnx_node.outputs(),

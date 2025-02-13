@@ -12,9 +12,8 @@ def _(onnx_node: OnnxNode, _: OnnxModel):
     mode = onnx_node.attributes().get('mode', 'CRD')
 
     assert mode == 'CRD', 'not implement'
-    torch_module = nn.PixelShuffle(blocksize)
 
-    torch_module = torch_module,
+    torch_module = nn.PixelShuffle(blocksize)
     onnx_mapping = {
         'inputs': onnx_node.inputs(),
         'outputs': onnx_node.outputs(),

@@ -20,7 +20,7 @@ class TorchGatherElements(nn.Module):
 def _(onnx_node: OnnxNode, _: OnnxModel):
     axis = onnx_node.attributes().get('axis', 0)
 
-    torch_module = TorchGatherElements(axis),
+    torch_module = TorchGatherElements(axis)
     onnx_mapping = {
         'inputs': onnx_node.inputs(),
         'outputs': onnx_node.outputs(),

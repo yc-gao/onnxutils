@@ -29,7 +29,7 @@ def _(onnx_node: OnnxNode, _: OnnxModel):
     mode = onnx_node.attributes().get('mode', 'bilinear')
     padding_mode = onnx_node.attributes().get('padding_mode', 'zeros')
 
-    torch_module = TorchGridSample(align_corners, mode, padding_mode),
+    torch_module = TorchGridSample(align_corners, mode, padding_mode)
     onnx_mapping = {
         'inputs': onnx_node.inputs(),
         'outputs': onnx_node.outputs(),

@@ -16,7 +16,7 @@ class TorchMatMul(nn.Module):
 
 @add_converter(op_type='MatMul', version=13)
 def _(onnx_node: OnnxNode, _: OnnxModel):
-    torch_module = TorchMatMul(),
+    torch_module = TorchMatMul()
     onnx_mapping = {
         'inputs': onnx_node.inputs(),
         'outputs': onnx_node.outputs(),

@@ -29,7 +29,7 @@ def _(onnx_node: OnnxNode, onnx_model: OnnxModel):
 def _(onnx_node: OnnxNode, _: OnnxModel):
     axis = onnx_node.attributes().get('axis', -1)
 
-    torch_module = nn.Softmax(axis),
+    torch_module = nn.Softmax(axis)
     onnx_mapping = {
         'inputs': onnx_node.inputs(),
         'outputs': onnx_node.outputs(),

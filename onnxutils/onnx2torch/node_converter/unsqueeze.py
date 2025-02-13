@@ -42,7 +42,7 @@ def _(onnx_node: OnnxNode, onnx_model: OnnxModel):
     vinfo = onnx_model.get_vinfo_by_name(onnx_node.outputs()[0])
     shape = [x.dim_value if x.HasField(
         'dim_value') else -1 for x in vinfo.type.tensor_type.shape.dim]
-    torch_module = TorchReshape(shape),
+    torch_module = TorchReshape(shape)
     onnx_mapping = {
         'inputs': onnx_node.inputs()[:1],
         'outputs': onnx_node.outputs(),

@@ -27,7 +27,7 @@ def _(onnx_node: OnnxNode, onnx_model: OnnxModel):
     if max_val is not None:
         max_val = max_val.to_numpy().item()
 
-    torch_module = TorchClip(min_val, max_val),
+    torch_module = TorchClip(min_val, max_val)
     onnx_mapping = {
         'inputs': onnx_node.inputs()[:1],
         'outputs': onnx_node.outputs(),

@@ -92,7 +92,7 @@ def convert(
                 args.append(torch_input_node)
             else:
                 raise RuntimeError(
-                    f'Got unexpected input value type ({value_name})')
+                    f'Got unexpected input value name ({value_name})')
 
         torch_nodes[onnx_node.name()] = torch_graph.call_module(
             module_name=normalize_module_name(onnx_node.name()), args=tuple(args))

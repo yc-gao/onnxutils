@@ -60,7 +60,7 @@ def _(onnx_node: OnnxNode, _: OnnxModel):
         output_padding,
         group,
         dilations,
-        func_mapping[len(kernel_shape)]),
+        func_mapping[len(kernel_shape)])
     onnx_mapping = {
         'inputs': onnx_node.inputs(),
         'outputs': onnx_node.outputs(),

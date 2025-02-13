@@ -44,9 +44,13 @@ class TorchBinaryOp(nn.Module):
 def _(onnx_node: OnnxNode, onnx_model: OnnxModel):
     op_type = onnx_node.op_type()
     if op_type == 'Div':
-        inputs_type = [
-            onnx_model.get_vinfo_by_name(x).type.tensor_type.elem_type
+        inputs_vinfo = [
+            onnx_model.get_vinfo_by_name(x)
             for x in onnx_node.inputs()
+        ]
+        inputs_type = [
+            x.type.tensor_type.elem_type if x is not None else x
+            for x in inputs_vinfo
         ]
 
         integer_types = (

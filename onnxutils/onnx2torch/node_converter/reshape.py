@@ -17,7 +17,7 @@ class TorchReshape(nn.Module):
 
 
 @add_converter(op_type='Reshape', version=14)
-def _(onnx_node: OnnxNode, onnx_model: OnnxModel):  # pylint: disable=unused-argument
+def _(onnx_node: OnnxNode, onnx_model: OnnxModel):
     allowzero = bool(onnx_node.attributes().get('allowzero', 0))
 
     assert not allowzero, 'not implement'
@@ -25,7 +25,7 @@ def _(onnx_node: OnnxNode, onnx_model: OnnxModel):  # pylint: disable=unused-arg
     shape = onnx_model.get_initializer_by_name(
         onnx_node.inputs()[1]).to_numpy().tolist()
 
-    torch_module = TorchReshape(shape),
+    torch_module = TorchReshape(shape)
     onnx_mapping = {
         'inputs': onnx_node.inputs()[:1],
         'outputs': onnx_node.outputs(),
