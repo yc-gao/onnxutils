@@ -54,14 +54,10 @@ class FakeQuantize(FakeQuantizeBase):
         self.quant_max = self.activation_post_process.quant_max
         self.dtype = self.activation_post_process.dtype
         self.qscheme = self.activation_post_process.qscheme
-        self.ch_axis = (
-            self.activation_post_process.ch_axis
-            if hasattr(self.activation_post_process, "ch_axis")
-            else -1
-        )
-        self.is_per_channel = self.qscheme in self.per_channel_qscheme
+        self.ch_axis = getattr(self.activation_post_process, "ch_axis", 0)
 
         assert self.qscheme in self.supported_qscheme
+        self.is_per_channel = self.qscheme in self.per_channel_qscheme
 
         self.register_buffer("scale", torch.tensor([1.0], dtype=torch.float))
         self.register_buffer("zero_point", torch.tensor([0], dtype=torch.int))
@@ -73,9 +69,8 @@ class FakeQuantize(FakeQuantizeBase):
         if self.observer_enabled:
             self.activation_post_process(X.detach())
             _scale, _zero_point = self.calculate_qparams()
-            _scale, _zero_point = _scale.to(self.scale.device), _zero_point.to(
-                self.zero_point.device
-            )
+            _scale = _scale.to(self.scale.device)
+            _zero_point = _zero_point.to(self.zero_point.device)
             if self.scale.shape != _scale.shape:
                 self.scale.resize_(_scale.shape)
                 self.zero_point.resize_(_zero_point.shape)
@@ -108,8 +103,8 @@ class FixedFakeQuantize(torch.nn.Module):
             self,
             scale,
             zero_point,
-            quant_min=0,
-            quant_max=255,
+            quant_min,
+            quant_max,
             ch_axis=0):
         super().__init__()
 

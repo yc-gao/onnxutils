@@ -9,8 +9,7 @@ import numpy as np
 import onnx
 import onnxruntime as ort
 
-from onnxutils.onnx import OnnxModel
-from onnxutils.optim import apply_optimizers
+from onnxutils.onnx import OnnxModel, apply_optimizers
 from onnxutils.onnx2torch import convert
 
 

@@ -2,10 +2,9 @@ from operator import getitem
 
 import torch
 
-from onnxutils.onnx import OnnxModel, OnnxNode
+from onnxutils.onnx import OnnxModel
 
-from .registry import find_converter
-from .common import OnnxMapping
+from .node_converter.registry import find_converter
 
 
 class InitializersContainer(torch.nn.Module):
@@ -35,8 +34,9 @@ def convert(
     root_module = torch.nn.Module()
     root_module.add_module('initializers', root_initializer)
 
-    torch_nodes = {}
     torch_graph = torch.fx.Graph()
+
+    torch_nodes = {}
 
     # create input nodes
     for idx, name in enumerate(onnx_model.input_names()):
@@ -51,31 +51,31 @@ def convert(
 
     for onnx_node in onnx_model.nodes():
         converter = find_converter(
-            domain=onnx_node.domain(),
-            operation_type=onnx_node.op_type(),
+            op_type=onnx_node.op_type(),
             version=opset_import[onnx_node.domain()],
+            domain=onnx_node.domain(),
         )
 
         torch_module, onnx_mapping = converter(onnx_node, onnx_model)
-        setattr(torch_module, 'onnx_mapping', onnx_mapping)
+        torch_module.onnx_mapping = onnx_mapping
         root_module.add_module(
             normalize_module_name(onnx_node.name()),
             torch_module
         )
 
         args = []
-        for value_name in onnx_mapping.inputs:
+        for value_name in onnx_mapping.get('inputs', []):
             if onnx_model.get_input_by_name(value_name) is not None:
                 args.append(torch_nodes[value_name])
             elif onnx_model.get_initializer_by_name(value_name) is not None:
                 if value_name not in torch_nodes:
+                    initializer_value = onnx_model.get_initializer_by_name(
+                        value_name).to_torch()
+                    initializer_value.onnx_mapping = {
+                        'name': value_name}
                     buffer_idx = sum(
                         1 for _ in root_initializer.buffers())
                     buffer_name = f'onnx_initializer_{buffer_idx}'
-                    initializer_value = onnx_model.get_initializer_by_name(
-                        value_name).to_torch()
-                    initializer_value.onnx_mapping = OnnxMapping(
-                        name=value_name)
                     root_initializer.add_initializer(
                         buffer_name,
                         initializer_value,
@@ -97,26 +97,30 @@ def convert(
         torch_nodes[onnx_node.name()] = torch_graph.call_module(
             module_name=normalize_module_name(onnx_node.name()), args=tuple(args))
 
-    if len(onnx_model.output_names()) > 1:
-        torch_graph.output(
-            tuple(
-                torch_nodes[onnx_model.get_node_by_output(output_name).name()]
-                for output_name in onnx_model.output_names()
-            ))
+    args = []
+    for output_name in onnx_model.output_names():
+        onnx_output_node = onnx_model.get_node_by_output(output_name)
+        assert onnx_output_node is not None
+        torch_output_node = torch_nodes[onnx_output_node.name()]
+        if len(onnx_output_node.outputs()) > 1:
+            index = onnx_output_node.outputs().index(output_name)
+            torch_output_node = torch_graph.call_function(
+                getitem, args=(torch_output_node, index))
+        args.append(torch_output_node)
+
+    if len(args) > 1:
+        torch_graph.output(tuple(args))
     else:
-        output_name = onnx_model.output_names()[0]
-        torch_graph.output(
-            torch_nodes[onnx_model.get_node_by_output(output_name).name()]
-        )
+        torch_graph.output(args[0])
 
     torch_graph.lint()
 
     torch_model = torch.fx.GraphModule(root=root_module, graph=torch_graph)
     setattr(torch_model,
             'onnx_mapping',
-            OnnxMapping(
-                inputs=onnx_model.input_names(),
-                outputs=onnx_model.output_names(),
-            )
+            {
+                'inputs': onnx_model.input_names(),
+                'outputs': onnx_model.output_names(),
+            }
             )
     return torch_model
