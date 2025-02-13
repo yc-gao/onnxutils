@@ -20,7 +20,6 @@ def normalize_module_name(name, domain='', op_type=''):
     name = name or op_type
     name = name.replace('.', '_')
     name = name.replace('/', '_')
-    name = name.lstrip('/')
     return name
 
 
