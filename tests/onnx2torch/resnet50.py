@@ -38,7 +38,7 @@ class Resnet50Tests(unittest.TestCase):
             gt = torch_model(data)
             pred = onnx_model(data)
 
-            self.assertTrue(torch.allclose(pred, gt, atol=1e-4))
+            self.assertTrue(torch.allclose(pred, gt, atol=1e-5))
 
 
 if __name__ == '__main__':
