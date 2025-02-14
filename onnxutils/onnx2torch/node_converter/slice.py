@@ -27,7 +27,7 @@ class TorchSlice(nn.Module):
     def __init__(self):
         super().__init__()
 
-    def forward(self, data, starts, ends, axes, steps):
+    def forward(self, data, starts, ends, axes, steps=1):
         return TorchSliceFunc.apply(data, starts, ends, axes, steps)
 
 

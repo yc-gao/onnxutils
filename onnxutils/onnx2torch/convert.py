@@ -1,4 +1,5 @@
 from operator import getitem
+import warnings
 
 import torch
 
@@ -93,7 +94,7 @@ def convert(
                         getitem, args=(torch_input_node, index))
                 args.append(torch_input_node)
             else:
-                raise RuntimeError(
+                warnings.warn(
                     f'Got unexpected input value name ({value_name})')
 
         torch_nodes[onnx_node.name()] = torch_graph.call_module(
