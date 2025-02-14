@@ -11,6 +11,8 @@ class TorchSliceFunc(torch.autograd.Function):
     @staticmethod
     def forward(ctx, data, starts, ends, axes, steps) -> torch.Tensor:
         slices = [slice(None)] * data.dim()
+        if steps is None:
+            steps = [1] * data.dim()
         for i, axis in enumerate(axes):
             start = starts[i]
             end = ends[i]
@@ -27,7 +29,7 @@ class TorchSlice(nn.Module):
     def __init__(self):
         super().__init__()
 
-    def forward(self, data, starts, ends, axes, steps=1):
+    def forward(self, data, starts, ends, axes, steps=None):
         return TorchSliceFunc.apply(data, starts, ends, axes, steps)
 
 
