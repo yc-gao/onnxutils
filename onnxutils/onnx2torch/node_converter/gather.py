@@ -13,7 +13,7 @@ class TorchGather(nn.Module):
         self.axis = axis
 
     def forward(self, x, index):
-        return torch.index_select(x, self.dim, index)
+        return torch.index_select(x, self.axis, index)
 
 
 @add_converter(op_type='Gather', version=13)
