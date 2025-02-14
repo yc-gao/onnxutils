@@ -72,7 +72,9 @@ def convert(
                     initializer_value = onnx_model.get_initializer_by_name(
                         value_name).to_torch()
                     initializer_value.onnx_mapping = {
-                        'name': value_name}
+                        'name': value_name,
+                        'is_parameter': value_name in onnx_mapping.get('params', [])
+                    }
                     buffer_idx = sum(
                         1 for _ in root_initializer.buffers())
                     buffer_name = f'onnx_initializer_{buffer_idx}'
