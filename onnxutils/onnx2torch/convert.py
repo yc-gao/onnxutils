@@ -90,8 +90,14 @@ def convert(
                 torch_input_node = torch_nodes[onnx_input_node.name()]
                 if len(onnx_input_node.outputs()) > 1:
                     index = onnx_input_node.outputs().index(value_name)
-                    torch_input_node = torch_graph.call_function(
-                        getitem, args=(torch_input_node, index))
+                    maybe_torch_input_node = torch_nodes.get(
+                        (torch_input_node, index),
+                        None)
+                    if maybe_torch_input_node is None:
+                        maybe_torch_input_node = torch_graph.call_function(
+                            getitem, args=(torch_input_node, index))
+                        torch_nodes[(torch_input_node, index)] = maybe_torch_input_node
+                    torch_input_node = maybe_torch_input_node
                 args.append(torch_input_node)
             else:
                 warnings.warn(
