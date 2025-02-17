@@ -1,3 +1,5 @@
+import warnings
+
 import onnx
 import torch
 from torch import nn
@@ -52,6 +54,10 @@ def _(onnx_node: OnnxNode, onnx_model: OnnxModel):
             x.type.tensor_type.elem_type if x is not None else x
             for x in inputs_vinfo
         ]
+
+        if any(t is None for t in inputs_type):
+            warnings.warn(
+                f"unable to get data type, use fdiv default, results may make a huge difference")
 
         integer_types = (
             onnx.TensorProto.DataType.UINT4,
