@@ -16,7 +16,7 @@ def _(onnx_node: OnnxNode, _: OnnxModel):
 
 
 @add_converter(op_type='Sigmoid', version=13)
-def _(onnx_node: OnnxNode, onnx_model: OnnxModel):
+def _(onnx_node: OnnxNode, _: OnnxModel):
     torch_module = nn.Sigmoid()
     onnx_mapping = {
         'inputs': onnx_node.inputs(),
