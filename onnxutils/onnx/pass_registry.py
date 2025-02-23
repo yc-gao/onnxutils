@@ -6,7 +6,7 @@ _optimizer_registry = {}
 def add_optimizer(name):
     def wrapper(cls):
         if name in _optimizer_registry:
-            raise f"optimizer '{name}' already registered"
+            raise RuntimeError(f"optimizer '{name}' already registered")
         _optimizer_registry[name] = cls
         return cls
     return wrapper
