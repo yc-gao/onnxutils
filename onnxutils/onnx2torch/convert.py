@@ -1,14 +1,19 @@
+from typing import Union
+
 from operator import getitem
-import warnings
 
 import torch
+from onnx import OperatorSetIdProto
 
 from onnxutils.onnx import OnnxModel
 
 from .converter_registry import find_converter
 
 
-def normalize_module_name(name, domain='', op_type=''):
+def normalize_module_name(
+        name: str,
+        domain: str = '',
+        op_type: str = '') -> str:
     name = name or f'{domain}.{op_type}'
     name = name.replace('.', '_')
     name = name.replace('/', '_')
@@ -19,20 +24,24 @@ def convert(
     onnx_model: OnnxModel,
     keep_input_names: bool = True,
 ) -> torch.fx.GraphModule:
-    opset_import = {
+
+    opset_import: dict[str, OperatorSetIdProto] = {
         opsetid_proto.domain: opsetid_proto.version for opsetid_proto in onnx_model.opsets()  # noqa
     }
 
-    root_module = torch.nn.Module()
-    root_graph = torch.fx.Graph()
+    root_module: torch.nn.Module = torch.nn.Module()
+    root_graph: torch.fx.Graph = torch.fx.Graph()
 
-    nodes_mapping = {}
+    nodes_mapping: dict[
+        Union[str, tuple[torch.fx.Node, int]],
+        torch.fx.Node
+    ] = {}
 
     def get_or_create_torch_node(value_name):
         if onnx_model.get_input_by_name(value_name):
             return nodes_mapping[value_name]
 
-        elif initializer_value := onnx_model.get_initializer_by_name(value_name):
+        elif initializer_value := onnx_model.get_initializer_by_name(value_name):  # noqa
             torch_node = nodes_mapping.get(value_name, None)
             if torch_node is not None:
                 return torch_node
@@ -50,9 +59,8 @@ def convert(
 
         elif onnx_node := onnx_model.get_node_by_output(value_name):
             torch_node = nodes_mapping[onnx_node.name()]
-            maybe_torch_node = torch_node
             if len(onnx_node.outputs()) <= 1:
-                return maybe_torch_node
+                return torch_node
             index = onnx_node.outputs().index(value_name)
             maybe_torch_node = nodes_mapping.get(
                 (torch_node, index),
@@ -67,8 +75,8 @@ def convert(
             nodes_mapping[(torch_node, index)] = maybe_torch_node
             return maybe_torch_node
         else:
-            warnings.warn(
-                f'got unexpected input value name "{value_name}"')
+            raise RuntimeError(
+                f"got unexpected value name '{value_name}'")
 
     # create input nodes
     for idx, name in enumerate(onnx_model.input_names()):
@@ -96,7 +104,8 @@ def convert(
         nodes_mapping[onnx_node.name()] = root_graph.call_module(
             module_name=normalize_module_name(onnx_node.name()),
             args=tuple(
-                get_or_create_torch_node(x) for x in onnx_mapping.get('inputs', [])
+                get_or_create_torch_node(x)
+                for x in onnx_mapping.get('inputs', [])
             )
         )
 
@@ -104,8 +113,10 @@ def convert(
                     for x in onnx_model.output_names())
     if len(outputs) > 1:
         root_graph.output(outputs)
-    else:
+    elif len(outputs) == 1:
         root_graph.output(outputs[0])
+    else:
+        raise RuntimeError("got no val to return")
 
     root_graph.lint()
     torch_model = torch.fx.GraphModule(root=root_module, graph=root_graph)

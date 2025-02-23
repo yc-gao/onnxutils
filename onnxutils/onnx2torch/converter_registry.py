@@ -17,10 +17,10 @@ def add_converter(
         if op_key in _converter_registry:
             if force:
                 warnings.warn(
-                    f"Operation '{op_key}' already registered, overwrite")
+                    f"operation '{op_key}' already registered, overwrite")
             else:
-                raise ValueError(
-                    f"Operation '{op_key}' already registered")
+                raise RuntimeError(
+                    f"operation '{op_key}' already registered")
         _converter_registry[op_key] = converter
         return converter
     return deco
