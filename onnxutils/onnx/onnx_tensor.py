@@ -15,14 +15,14 @@ class OnnxTensor:
         return cls.from_numpy(tensor.detach().cpu().numpy(), name=name)
 
     def __init__(self, onnx_tensor: TensorProto):
-        self._proto = onnx_tensor
+        self._proto: TensorProto = onnx_tensor
 
     def clone(self):
         t = TensorProto()
         t.CopyFrom(self._proto)
         return OnnxTensor(t)
 
-    def proto(self):
+    def proto(self) -> TensorProto:
         return self._proto
 
     def name(self) -> str:

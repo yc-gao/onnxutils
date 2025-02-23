@@ -16,12 +16,11 @@ def find_optimizer(name):
     return _optimizer_registry.get(name, None)
 
 
-def apply_optimizers(onnx_model: OnnxModel, optimizers):
-    for name in optimizers:
-        optimizer = find_optimizer(name)
-        onnx_model = optimizer.apply(onnx_model)
-    return onnx_model
-
-
 def list_optimizers():
     return tuple(_optimizer_registry.keys())
+
+
+def apply_optimizers(onnx_model: OnnxModel, optimizers):
+    for name in optimizers:
+        onnx_model = find_optimizer(name).apply(onnx_model)
+    return onnx_model

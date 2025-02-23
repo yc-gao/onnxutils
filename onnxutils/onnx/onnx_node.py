@@ -5,7 +5,7 @@ from onnx import NodeProto, AttributeProto
 from .onnx_tensor import OnnxTensor
 
 
-def parse_attribute_value(attribute: AttributeProto):
+def _parse_attribute_value(attribute: AttributeProto):
     if attribute.HasField('i'):
         value = attribute.i
     elif attribute.HasField('f'):
@@ -29,12 +29,12 @@ def parse_attribute_value(attribute: AttributeProto):
 
 class OnnxNode:
     def __init__(self, onnx_node: NodeProto):
-        self._proto = onnx_node
+        self._proto: NodeProto = onnx_node
 
-        self._inputs = tuple(self._proto.input)
-        self._outputs = tuple(self._proto.output)
-        self._attrs = {
-            attr.name: parse_attribute_value(attr)
+        self._inputs: tuple[str, ...] = tuple(self._proto.input)
+        self._outputs: tuple[str, ...] = tuple(self._proto.output)
+        self._attrs: dict[str, object] = {
+            attr.name: _parse_attribute_value(attr)
             for attr in self._proto.attribute
         }
 
@@ -43,25 +43,25 @@ class OnnxNode:
         t.CopyFrom(self._proto)
         return OnnxNode(t)
 
-    def proto(self):
+    def proto(self) -> NodeProto:
         return self._proto
 
-    def name(self):
+    def name(self) -> str:
         return self._proto.name
 
-    def domain(self):
+    def domain(self) -> str:
         return self._proto.domain
 
-    def op_type(self):
+    def op_type(self) -> str:
         return self._proto.op_type
 
-    def inputs(self):
+    def inputs(self) -> tuple[str, ...]:
         return self._inputs
 
-    def outputs(self):
+    def outputs(self) -> tuple[str, ...]:
         return self._outputs
 
-    def attributes(self):
+    def attributes(self) -> MappingProxyType[str, object]:
         return MappingProxyType(self._attrs)
 
     def attribute(self, name, val=None):

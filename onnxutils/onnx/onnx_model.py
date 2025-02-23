@@ -1,23 +1,23 @@
+from typing import Optional, Union
+
 import os
 import uuid
 from collections import Counter
 
 import onnx
 from onnx.utils import Extractor
-from onnx import ModelProto
-from onnx import TensorProto
-from onnx import NodeProto
+from onnx import OperatorSetIdProto, ValueInfoProto, TensorProto, NodeProto, ModelProto
 
 from .onnx_tensor import OnnxTensor
 from .onnx_node import OnnxNode
 
 
 class OnnxModel:
-    @staticmethod
-    def from_file(fpath):
+    @classmethod
+    def from_file(cls, fpath):
         if isinstance(fpath, os.PathLike):
             fpath = os.fspath(fpath)
-        return OnnxModel(onnx.load(fpath))
+        return cls(onnx.load(fpath))
 
     def __init__(self, model: ModelProto):
         self.reindex(model)
@@ -34,94 +34,103 @@ class OnnxModel:
 
     def reindex(self, model: ModelProto):
         model = onnx.shape_inference.infer_shapes(model)
-        self._proto = model
+        self._proto: ModelProto = model
 
-        self._nodes = tuple(OnnxNode(x) for x in self._proto.graph.node)
-        self._inputs = tuple(x for x in self._proto.graph.input)
-        self._outputs = tuple(x for x in self._proto.graph.output)
-        self._initializers = tuple(OnnxTensor(x)
-                                   for x in self._proto.graph.initializer)
+        self._nodes: tuple[OnnxNode, ...] = tuple(
+            OnnxNode(x) for x in self._proto.graph.node
+        )
+        self._inputs: tuple[ValueInfoProto, ...] = tuple(
+            x for x in self._proto.graph.input)
+        self._outputs: tuple[ValueInfoProto, ...] = tuple(
+            x for x in self._proto.graph.output)
+        self._initializers: tuple[OnnxTensor, ...] = tuple(
+            OnnxTensor(x)
+            for x in self._proto.graph.initializer)
 
-        self._name_to_node = {
+        self._name_to_node: dict[str, OnnxNode] = {
             x.name(): x for x in self._nodes
         }
-        self._output_to_node = {
+        self._output_to_node: dict[str, OnnxNode] = {
             output: node for node in self._nodes for output in node.outputs()
         }
 
-        self._name_to_initializer = {
+        self._name_to_initializer: dict[str, OnnxTensor] = {
             x.name(): x for x in self._initializers
         }
 
-        self._name_to_input = {
+        self._name_to_input: dict[str, ValueInfoProto] = {
             x.name: x for x in self._inputs
         }
-        self._name_to_output = {
+        self._name_to_output: dict[str, ValueInfoProto] = {
             x.name: x for x in self._outputs
         }
-        self._name_to_vinfo = {
+        self._name_to_vinfo: dict[str, ValueInfoProto] = {
             x.name: x for x in self._proto.graph.value_info
         }
         self._name_to_vinfo.update(self._name_to_input)
         self._name_to_vinfo.update(self._name_to_output)
 
-        self._name_to_counter = Counter(
-            [input_name for node in self._proto.graph.node for input_name in node.input] +
+        self._name_to_counter: Counter = Counter(
+            [
+                input_name
+                for node in self._proto.graph.node
+                for input_name in node.input
+            ] +
             [x.name for x in self._proto.graph.output]
         )
 
-    def proto(self):
+    def proto(self) -> ModelProto:
         return self._proto
 
-    def opsets(self):
+    def opsets(self) -> tuple[OperatorSetIdProto, ...]:
         return tuple(x for x in self._proto.opset_import)
 
-    def inputs(self):
+    def inputs(self) -> tuple[ValueInfoProto, ...]:
         return self._inputs
 
-    def input_names(self):
+    def input_names(self) -> tuple[str, ...]:
         return tuple({x.name for x in self._inputs})
 
-    def get_input_by_name(self, name):
+    def get_input_by_name(self, name) -> ValueInfoProto:
         return self._name_to_input.get(name, None)
 
-    def outputs(self):
+    def outputs(self) -> tuple[ValueInfoProto, ...]:
         return self._outputs
 
-    def output_names(self):
+    def output_names(self) -> tuple[str, ...]:
         return tuple({x.name for x in self._outputs})
 
-    def get_output_by_name(self, name):
+    def get_output_by_name(self, name) -> ValueInfoProto:
         return self._name_to_output.get(name, None)
 
-    def initializers(self):
+    def initializers(self) -> tuple[OnnxTensor, ...]:
         return self._initializers
 
-    def initializer_names(self):
+    def initializer_names(self) -> tuple[str, ...]:
         return tuple({x.name() for x in self._initializers})
 
-    def get_initializer_by_name(self, name):
+    def get_initializer_by_name(self, name) -> Optional[OnnxTensor]:
         return self._name_to_initializer.get(name, None)
 
-    def nodes(self):
+    def nodes(self) -> tuple[OnnxNode, ...]:
         return self._nodes
 
-    def node_names(self):
-        return set({x.name() for x in self._nodes})
+    def node_names(self) -> tuple[str, ...]:
+        return tuple(x.name() for x in self._nodes)
 
-    def get_node_by_name(self, name):
+    def get_node_by_name(self, name) -> Optional[OnnxNode]:
         return self._name_to_node.get(name, None)
 
-    def get_node_by_output(self, output):
+    def get_node_by_output(self, output) -> Optional[OnnxNode]:
         return self._output_to_node.get(output, None)
 
-    def get_vinfo_by_name(self, name):
+    def get_vinfo_by_name(self, name) -> Optional[ValueInfoProto]:
         return self._name_to_vinfo.get(name, None)
 
-    def get_counter_of_tensor(self, name: str):
+    def get_counter_of_tensor(self, name: str) -> int:
         return self._name_to_counter[name]
 
-    def get_counter_of_node(self, name_or_node):
+    def get_counter_of_node(self, name_or_node) -> int:
         if isinstance(name_or_node, str):
             name_or_node = self._name_to_node.get(name_or_node, None)
         assert name_or_node
@@ -130,8 +139,8 @@ class OnnxModel:
             for output_value in name_or_node.outputs())
 
     def topological_sort(self, is_deterministic=False):
-        node_visited = set()
-        sorted_nodes = []
+        node_visited: set[str] = set()
+        sorted_nodes: list[OnnxNode] = []
 
         def do_sort(arr):
             if not is_deterministic:
@@ -141,7 +150,7 @@ class OnnxModel:
             arr.sort()
             return arr
 
-        def dfs(node):
+        def dfs(node: Optional[OnnxNode]):
             if node is None:
                 return
             if node.name() in node_visited:
@@ -159,19 +168,24 @@ class OnnxModel:
         model.graph.node.extend([x.proto() for x in sorted_nodes])
         self.reindex(model)
 
-    def extract(self, input_names, output_names):
+    def extract(
+            self,
+            input_names: Union[set[str], tuple[str, ...]],
+            output_names: Union[set[str], tuple[str, ...]]):
         input_names = set(input_names)
         output_names = set(output_names)
 
-        tensor_visited = set()
-        node_visited = set()
+        tensor_visited: set[str] = set()
+        node_visited: set[str] = set()
 
-        nodes = []
-        inputs = []
-        outputs = [self.get_vinfo_by_name(x) for x in output_names]
-        initializers = []
+        nodes: list[NodeProto] = []
+        inputs: list[ValueInfoProto] = []
+        outputs: list[ValueInfoProto] = [
+            self.get_vinfo_by_name(x) for x in output_names
+        ]
+        initializers: list[TensorProto] = []
 
-        def dfs(output_name):
+        def dfs(output_name: str):
             if output_name in tensor_visited:
                 return
             tensor_visited.add(output_name)
@@ -207,34 +221,34 @@ class OnnxModel:
     def session(self):
         class Session:
             def __init__(self, onnx_model: OnnxModel):
-                self._onnx_model = onnx_model
+                self._onnx_model: OnnxModel = onnx_model
 
-                self._counter = 0
+                self._counter: int = 0
 
-                self._remap_node_inputs = {}
+                self._remap_node_inputs: dict[str, str] = {}
 
-                self._initializers_to_remove = []
-                self._initializers_to_add = []
+                self._initializers_to_remove: list[OnnxTensor] = []
+                self._initializers_to_add: list[TensorProto] = []
 
-                self._nodes_to_remove = []
-                self._nodes_to_add = []
+                self._nodes_to_remove: list[OnnxNode] = []
+                self._nodes_to_add: list[NodeProto] = []
 
-                self._inputs_to_remove = []
-                self._inputs_to_add = []
+                self._inputs_to_remove: list[ValueInfoProto] = []
+                self._inputs_to_add: list[ValueInfoProto] = []
 
-                self._outputs_to_remove = []
-                self._outputs_to_add = []
+                self._outputs_to_remove: list[ValueInfoProto] = []
+                self._outputs_to_add: list[ValueInfoProto] = []
 
             def unique_name(self):
                 while True:
                     name = f"random_{uuid.uuid1()}_{self._counter}"
                     name = name.replace('-', '_')
                     self._counter += 1
-                    if self._onnx_model.get_node_by_name(name) is not None:
+                    if self._onnx_model.get_node_by_name(name):
                         continue
-                    if self._onnx_model.get_vinfo_by_name(name) is not None:
+                    if self._onnx_model.get_vinfo_by_name(name):
                         continue
-                    if self._onnx_model.get_initializer_by_name(name) is not None:
+                    if self._onnx_model.get_initializer_by_name(name):
                         continue
                     return name
 
@@ -274,7 +288,7 @@ class OnnxModel:
             def __enter__(self):
                 return self
 
-            def __exit__(self, *args):
+            def __exit__(self, *_):
                 onnx_model = self._onnx_model.proto()
                 for node in onnx_model.graph.node:
                     for idx in range(len(node.input)):
