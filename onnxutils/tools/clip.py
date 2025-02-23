@@ -22,12 +22,9 @@ def main():
 
     onnx_model = OnnxModel.from_file(options.model)
 
-    inodes = options.inodes
-    onodes = options.onodes or onnx_model.output_names()
-
     onnx_model = onnx_model.extract(
-        inodes,
-        onodes)
+        set(options.inodes) | set(onnx_model.input_names()),
+        options.onodes)
 
     output = Path(options.output)
     output.parent.mkdir(parents=True, exist_ok=True)
