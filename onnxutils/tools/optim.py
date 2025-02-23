@@ -2,7 +2,7 @@
 import argparse
 
 from onnxutils.onnx import OnnxModel
-from onnxutils.onnx.onnx_pass import apply_optimizers
+from onnxutils.onnx import apply_optimizers
 
 
 def parse_options():
