@@ -1,9 +1,9 @@
-from .onnx_model import OnnxModel
+from ..onnx_model import OnnxModel
 
-from .pass_manager import optimizer
+from ..pass_registry import add_optimizer
 
 
-@optimizer('eliminate-identity')
+@add_optimizer('eliminate-identity')
 class _:
     @staticmethod
     def apply(onnx_model: OnnxModel) -> OnnxModel:

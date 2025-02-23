@@ -1,8 +1,8 @@
 import onnx
 
-from .onnx_model import OnnxModel
+from ..onnx_model import OnnxModel
+from ..pass_registry import add_optimizer
 
-from .pass_manager import optimizer
 from .dag_matcher import DagMatcher
 
 dag_pattern = DagMatcher({
@@ -17,7 +17,7 @@ dag_pattern = DagMatcher({
 })
 
 
-@optimizer('convert-qdq-to-fq')
+@add_optimizer('convert-qdq-to-fq')
 class _:
     @staticmethod
     def apply(onnx_model: OnnxModel) -> OnnxModel:

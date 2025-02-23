@@ -1,12 +1,11 @@
 import onnx
 import numpy as np
 
-from .onnx_model import OnnxModel
+from ..onnx_model import OnnxModel
+from ..pass_registry import add_optimizer
 
-from .pass_manager import optimizer
 
-
-@optimizer('convert-shape-to-initializer')
+@add_optimizer('convert-shape-to-initializer')
 class _:
     @staticmethod
     def apply(onnx_model: OnnxModel) -> OnnxModel:

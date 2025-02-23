@@ -4,7 +4,7 @@ from torch.nn import functional as F
 
 from onnxutils.onnx import OnnxModel, OnnxNode
 
-from .registry import add_converter
+from ..converter_registry import add_converter
 
 func_mapping = {
     1: F.conv_transpose1d,

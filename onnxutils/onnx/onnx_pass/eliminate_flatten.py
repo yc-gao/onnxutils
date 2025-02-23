@@ -1,8 +1,9 @@
-from .onnx_model import OnnxModel
-from .pass_manager import optimizer
+from ..onnx_model import OnnxModel
+
+from ..pass_registry import add_optimizer
 
 
-@optimizer('eliminate-flatten')
+@add_optimizer('eliminate-flatten')
 class _:
     @staticmethod
     def apply(onnx_model: OnnxModel) -> OnnxModel:

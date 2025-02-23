@@ -1,8 +1,9 @@
-from .onnx_model import OnnxModel
-from .pass_manager import optimizer
+from ..onnx_model import OnnxModel
+
+from ..pass_registry import add_optimizer
 
 
-@optimizer('convert-constant-to-initializer')
+@add_optimizer('eliminate-concat')
 class _:
     @staticmethod
     def apply(onnx_model: OnnxModel) -> OnnxModel:
@@ -10,5 +11,4 @@ class _:
         return OnnxModel(
             onnxoptimizer.optimize(
                 onnx_model.proto(),
-                passes=['extract_constant_to_initializer']))
-
+                passes=['eliminate_nop_concat']))

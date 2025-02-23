@@ -1,8 +1,8 @@
-from .onnx_model import OnnxModel
-from .pass_manager import optimizer
+from ..onnx_model import OnnxModel
+from ..pass_registry import add_optimizer
 
 
-@optimizer('eliminate-cast')
+@add_optimizer('eliminate-reshape')
 class _:
     @staticmethod
     def apply(onnx_model: OnnxModel) -> OnnxModel:
@@ -10,4 +10,4 @@ class _:
         return OnnxModel(
             onnxoptimizer.optimize(
                 onnx_model.proto(),
-                passes=['eliminate_nop_cast']))
+                passes=['eliminate_nop_reshape']))

@@ -5,7 +5,7 @@ import torch
 
 from onnxutils.onnx import OnnxModel
 
-from .node_converter.registry import find_converter
+from .converter_registry import find_converter
 
 
 def normalize_module_name(name, domain='', op_type=''):

@@ -5,7 +5,7 @@ from torch import nn
 
 from onnxutils.onnx import OnnxModel, OnnxNode
 
-from .registry import add_converter
+from ..converter_registry import add_converter
 
 dtype_mapping = {
     int(onnx.TensorProto.FLOAT): torch.float32,

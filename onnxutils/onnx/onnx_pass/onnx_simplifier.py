@@ -1,9 +1,9 @@
-from .onnx_model import OnnxModel
+from ..onnx_model import OnnxModel
 
-from .pass_manager import optimizer
+from ..pass_registry import add_optimizer
 
 
-@optimizer('onnx-simplifier')
+@add_optimizer('onnx-simplifier')
 class _:
     @staticmethod
     def apply(onnx_model: OnnxModel) -> OnnxModel:

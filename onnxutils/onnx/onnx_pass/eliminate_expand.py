@@ -1,8 +1,9 @@
-from .onnx_model import OnnxModel
-from .pass_manager import optimizer
+from ..onnx_model import OnnxModel
+
+from ..pass_registry import add_optimizer
 
 
-@optimizer('eliminate-expand')
+@add_optimizer('eliminate-expand')
 class _:
     @staticmethod
     def apply(onnx_model: OnnxModel) -> OnnxModel:

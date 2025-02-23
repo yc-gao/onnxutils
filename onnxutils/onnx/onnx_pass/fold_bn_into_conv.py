@@ -1,8 +1,8 @@
-from .onnx_model import OnnxModel
-from .pass_manager import optimizer
+from ..onnx_model import OnnxModel
+from ..pass_registry import add_optimizer
 
 
-@optimizer('eliminate-split')
+@add_optimizer('fold-bn-into-conv')
 class _:
     @staticmethod
     def apply(onnx_model: OnnxModel) -> OnnxModel:
@@ -10,4 +10,5 @@ class _:
         return OnnxModel(
             onnxoptimizer.optimize(
                 onnx_model.proto(),
-                passes=['eliminate_nop_split']))
+                passes=['fuse_bn_into_conv']))
+

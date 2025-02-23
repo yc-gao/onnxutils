@@ -3,7 +3,7 @@ import torch
 from onnxutils.onnx import OnnxModel, OnnxNode
 from onnxutils.quantization import FixedFakeQuantize
 
-from .registry import add_converter
+from ..converter_registry import add_converter
 
 range_mapping = {
     torch.uint8: {

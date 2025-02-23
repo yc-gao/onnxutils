@@ -1,12 +1,11 @@
 import onnx
 import numpy as np
 
-from .onnx_model import OnnxModel
+from ..onnx_model import OnnxModel
+from ..pass_registry import add_optimizer
 
-from .pass_manager import optimizer
 
-
-@optimizer('split-conv-bias-to-bn')
+add_optimizer('split-conv-bias-to-bn')
 class _:
     @staticmethod
     def apply(onnx_model: OnnxModel) -> OnnxModel:

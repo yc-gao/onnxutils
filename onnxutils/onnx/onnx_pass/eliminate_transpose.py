@@ -1,8 +1,8 @@
-from .onnx_model import OnnxModel
-from .pass_manager import optimizer
+from ..onnx_model import OnnxModel
+from ..pass_registry import add_optimizer
 
 
-@optimizer('eliminate-transpose')
+@add_optimizer('eliminate-transpose')
 class _:
     @staticmethod
     def apply(onnx_model: OnnxModel) -> OnnxModel:

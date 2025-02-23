@@ -1,38 +1,5 @@
+from .converter_registry import add_converter, find_converter
+from . import node_converter
+
 from .convert import convert, normalize_module_name
 
-from .node_converter import activations
-from .node_converter import identity
-from .node_converter import conv
-from .node_converter import conv_transpose
-from .node_converter import binary_math_operations
-from .node_converter import unary_math_operations
-from .node_converter import resize
-from .node_converter import max_pool
-from .node_converter import gather_elements
-from .node_converter import gather
-from .node_converter import concat
-from .node_converter import reshape
-from .node_converter import slice
-from .node_converter import transpose
-from .node_converter import matmul
-from .node_converter import split
-from .node_converter import clip
-from .node_converter import squeeze
-from .node_converter import cast
-from .node_converter import scatter_nd
-from .node_converter import unsqueeze
-from .node_converter import grid_sample
-from .node_converter import reduce_mean
-from .node_converter import expand
-from .node_converter import reduce_sum
-from .node_converter import where
-from .node_converter import flatten
-from .node_converter import gemm
-from .node_converter import pad
-from .node_converter import batch_norm
-from .node_converter import arg_max
-from .node_converter import reduce_max
-from .node_converter import cum_sum
-from .node_converter import depth_to_space
-from .node_converter import global_avg_pool
-from .node_converter import fake_qdq

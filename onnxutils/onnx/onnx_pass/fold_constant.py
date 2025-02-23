@@ -1,8 +1,7 @@
 import onnx
 
-from .onnx_model import OnnxModel
-
-from .pass_manager import optimizer
+from ..onnx_model import OnnxModel
+from ..pass_registry import add_optimizer
 
 
 def eval_const_vals(onnx_model: OnnxModel, const_vals):
@@ -21,7 +20,7 @@ def eval_const_vals(onnx_model: OnnxModel, const_vals):
     ]
 
 
-@optimizer('fold-constant')
+@add_optimizer('fold-constant')
 class _:
     @staticmethod
     def apply(onnx_model: OnnxModel) -> OnnxModel:

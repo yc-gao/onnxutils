@@ -26,7 +26,8 @@ def main():
     onodes = options.onodes or onnx_model.output_names()
 
     onnx_model = onnx_model.extract(
-        inodes, onodes)
+        inodes,
+        onodes)
 
     output = Path(options.output)
     output.parent.mkdir(parents=True, exist_ok=True)

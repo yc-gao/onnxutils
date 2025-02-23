@@ -7,7 +7,7 @@ from torch import nn
 
 from onnxutils.onnx import OnnxModel, OnnxNode, OnnxTensor
 
-from .registry import add_converter
+from ..converter_registry import add_converter
 
 func_mapping = {
     'Add': torch.add,

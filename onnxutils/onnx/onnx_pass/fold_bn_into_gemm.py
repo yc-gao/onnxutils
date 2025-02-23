@@ -1,9 +1,9 @@
 import numpy as np
 
-from .onnx_model import OnnxModel
-from .onnx_tensor import OnnxTensor
+from ..onnx_model import OnnxModel
+from ..onnx_tensor import OnnxTensor
+from ..pass_registry import add_optimizer
 
-from .pass_manager import optimizer
 from .dag_matcher import DagMatcher
 
 dag_pattern = DagMatcher({
@@ -18,7 +18,7 @@ dag_pattern = DagMatcher({
 })
 
 
-@optimizer('fold-bn-into-gemm')
+@add_optimizer('fold-bn-into-gemm')
 class _:
     @staticmethod
     def apply(onnx_model: OnnxModel) -> OnnxModel:

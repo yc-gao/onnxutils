@@ -1,13 +1,12 @@
 import os
-import warnings
 import uuid
 from collections import Counter
 
 import onnx
 from onnx.utils import Extractor
-from onnx.onnx_ml_pb2 import ModelProto
-from onnx.onnx_ml_pb2 import TensorProto
-from onnx.onnx_ml_pb2 import NodeProto
+from onnx import ModelProto
+from onnx import TensorProto
+from onnx import NodeProto
 
 from .onnx_tensor import OnnxTensor
 from .onnx_node import OnnxNode
@@ -19,6 +18,19 @@ class OnnxModel:
         if isinstance(fpath, os.PathLike):
             fpath = os.fspath(fpath)
         return OnnxModel(onnx.load(fpath))
+
+    def __init__(self, model: ModelProto):
+        self.reindex(model)
+
+    def clone(self):
+        t = ModelProto()
+        t.CopyFrom(self._proto)
+        return OnnxModel(t)
+
+    def save(self, fpath):
+        if isinstance(fpath, os.PathLike):
+            fpath = os.fspath(fpath)
+        onnx.save(self._proto, fpath)
 
     def reindex(self, model: ModelProto):
         model = onnx.shape_inference.infer_shapes(model)
@@ -58,19 +70,6 @@ class OnnxModel:
             [x.name for x in self._proto.graph.output]
         )
 
-    def clone(self):
-        t = ModelProto()
-        t.CopyFrom(self._proto)
-        return OnnxModel(t)
-
-    def save(self, fpath):
-        if isinstance(fpath, os.PathLike):
-            fpath = os.fspath(fpath)
-        onnx.save(self._proto, fpath)
-
-    def __init__(self, model: ModelProto):
-        self.reindex(model)
-
     def proto(self):
         return self._proto
 
@@ -101,14 +100,14 @@ class OnnxModel:
     def initializer_names(self):
         return tuple({x.name() for x in self._initializers})
 
-    def get_initializer_by_name(self, name) -> OnnxTensor:
+    def get_initializer_by_name(self, name):
         return self._name_to_initializer.get(name, None)
 
     def nodes(self):
         return self._nodes
 
     def node_names(self):
-        return set({x.name for x in self._nodes})
+        return set({x.name() for x in self._nodes})
 
     def get_node_by_name(self, name):
         return self._name_to_node.get(name, None)
@@ -125,8 +124,7 @@ class OnnxModel:
     def get_counter_of_node(self, name_or_node):
         if isinstance(name_or_node, str):
             name_or_node = self._name_to_node.get(name_or_node, None)
-        if name_or_node is None:
-            return 0
+        assert name_or_node
         return max(
             self._name_to_counter[output_value]
             for output_value in name_or_node.outputs())
@@ -143,58 +141,59 @@ class OnnxModel:
             arr.sort()
             return arr
 
-        def dfs(node, output_name=None):
-            # print('node is None', node is None, output_name)
+        def dfs(node):
             if node is None:
                 return
             if node.name() in node_visited:
                 return
             node_visited.add(node.name())
             for input_name in node.inputs():
-                dfs(self.get_node_by_output(input_name), input_name)
+                dfs(self.get_node_by_output(input_name))
             sorted_nodes.append(node)
 
         for output_name in do_sort(self.output_names()):
-            dfs(self.get_node_by_output(output_name), output_name)
+            dfs(self.get_node_by_output(output_name))
 
         model = self._proto
         model.graph.ClearField("node")
         model.graph.node.extend([x.proto() for x in sorted_nodes])
         self.reindex(model)
 
-    def extract(self, input_names: list[str], output_names: list[str]):
-        inames = set(input_names)
-        onames = set(output_names)
+    def extract(self, input_names, output_names):
+        input_names = set(input_names)
+        output_names = set(output_names)
 
         tensor_visited = set()
         node_visited = set()
 
         nodes = []
         inputs = []
-        outputs = [self.get_vinfo_by_name(x) for x in onames]
+        outputs = [self.get_vinfo_by_name(x) for x in output_names]
         initializers = []
 
-        def dfs(oname, node_name=''):
-            if oname in tensor_visited:
+        def dfs(output_name):
+            if output_name in tensor_visited:
                 return
-            tensor_visited.add(oname)
-            if oname in inames:
-                inputs.append(self.get_vinfo_by_name(oname))
-            elif (input := self.get_input_by_name(oname)) is not None:
+            tensor_visited.add(output_name)
+            if output_name in input_names:
+                inputs.append(self.get_vinfo_by_name(output_name))
+            elif input := self.get_input_by_name(output_name):
                 inputs.append(input)
-            elif (initializer := self.get_initializer_by_name(oname)) is not None:
+            elif initializer := self.get_initializer_by_name(output_name):
                 initializers.append(initializer.proto())
-            elif (node := self.get_node_by_output(oname)) is not None:
-                if node.name not in node_visited:
+            elif node := self.get_node_by_output(output_name):
+                if node.name() not in node_visited:
                     for iname in node.inputs():
-                        dfs(iname, node.name())
+                        dfs(iname)
                     nodes.append(node.proto())
-                    node_visited.add(node.name)
+                    node_visited.add(node.name())
+            elif not output_name:
+                return
             else:
-                warnings.warn(f"unmatched tensor {node_name}:{oname}")
+                raise RuntimeError(f"unmatched tensor {output_name}")
 
-        for oname in onames:
-            dfs(oname)
+        for output_name in output_names:
+            dfs(output_name)
 
         model_pb = self.clone().proto()
         model_pb.ClearField('graph')
@@ -254,7 +253,7 @@ class OnnxModel:
             def remove_node(self, node: OnnxNode):
                 self._nodes_to_remove.append(node)
 
-            def remove_nodes(self, nodes):
+            def remove_nodes(self, nodes: list[OnnxNode]):
                 self._nodes_to_remove.extend(nodes)
 
             def remap_node_inputs(self, remap):
