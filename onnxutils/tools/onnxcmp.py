@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 
-import onnxutils.onnx
+from onnxutils.onnx import OnnxModel
 
 
 def dfscmp(onnx_model0, onnx_model1, output_name0, output_name1):
@@ -42,8 +42,8 @@ def parse_options():
 
 def main():
     options = parse_options()
-    onnx_model0 = onnxutils.onnx.OnnxModel.from_file(options.model0)
-    onnx_model1 = onnxutils.onnx.OnnxModel.from_file(options.model1)
+    onnx_model0 = OnnxModel.from_file(options.model0)
+    onnx_model1 = OnnxModel.from_file(options.model1)
 
     if len(onnx_model0.output_names()) != len(onnx_model1.output_names()):  # noqa
         print('output diff')
