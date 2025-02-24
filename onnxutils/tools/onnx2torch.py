@@ -53,6 +53,7 @@ def main():
     torch_model.print_readable()
 
     example_inputs = tuple(tensor_from_vinfo(x) for x in onnx_model.inputs())
+    torch_model(*example_inputs)
 
     if options.output:
         torch.onnx.export(
