@@ -57,7 +57,7 @@ def _(onnx_node: OnnxNode, onnx_model: OnnxModel):
 
         if any(t is None for t in inputs_type):
             warnings.warn(
-                f"unable to get data type, use fdiv default, results may make a huge difference")
+                f"unable to get data type for {onnx_node.name()}, use fdiv default, results may make a huge difference")  # noqa
 
         integer_types = (
             onnx.TensorProto.DataType.UINT4,

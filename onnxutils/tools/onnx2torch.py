@@ -6,7 +6,7 @@ import onnx
 import torch
 
 from onnxutils.common.random import rand_numpy
-from onnxutils.onnx import OnnxModel
+from onnxutils.onnx import OnnxModel, apply_optimizers
 from onnxutils.onnx2torch import convert
 
 
@@ -37,6 +37,16 @@ def main():
         for node in onnx_model.proto().graph.node:
             if node.name == '':
                 node.name = sess.unique_name()
+
+    onnx_model = apply_optimizers(
+        onnx_model, [
+            'eliminate-identity',
+            'convert-constant-to-initializer',
+            'fold-constant',
+
+            'convert-shape-to-initializer',
+            'fold-constant',
+        ])
 
     torch_model = convert(onnx_model, False)
     torch_model.print_readable()
