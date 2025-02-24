@@ -45,16 +45,19 @@ def main():
             'fold-constant',
 
             'convert-shape-to-initializer',
+            'eliminate-expand',
             'fold-constant',
         ])
 
-    torch_model = convert(onnx_model, False)
+    torch_model = convert(onnx_model)
     torch_model.print_readable()
+
+    example_inputs = tuple(tensor_from_vinfo(x) for x in onnx_model.inputs())
 
     if options.output:
         torch.onnx.export(
             torch_model,
-            tuple(tensor_from_vinfo(x) for x in onnx_model.inputs()),
+            example_inputs,
             options.output,
             input_names=torch_model.onnx_mapping['inputs'],
             output_names=torch_model.onnx_mapping['outputs'],
