@@ -15,3 +15,4 @@ from . import fold_bn_into_gemm
 from . import fold_constant
 from . import onnx_simplifier
 from . import split_conv_bias_to_bn
+from . import eliminate_relu
