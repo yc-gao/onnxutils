@@ -26,10 +26,10 @@ class _:
                 q_node = dag_pattern.GetNode(dag, 1)
 
                 if dq_node.outputs()[0] in output_names:
-                    raise NotImplementedError
-                else:
-                    sess.remap_node_inputs({
-                        dq_node.outputs()[0]: q_node.inputs()[0]
-                    })
+                    continue
+
+                sess.remap_node_inputs({
+                    dq_node.outputs()[0]: q_node.inputs()[0]
+                })
 
         return onnx_model

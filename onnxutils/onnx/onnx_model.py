@@ -5,7 +5,6 @@ import uuid
 from collections import Counter
 
 import onnx
-from onnx.utils import Extractor
 from onnx import OperatorSetIdProto, ValueInfoProto, TensorProto, NodeProto, ModelProto
 
 from .onnx_tensor import OnnxTensor
@@ -14,10 +13,11 @@ from .onnx_node import OnnxNode
 
 class OnnxModel:
     @classmethod
-    def from_file(cls, fpath):
-        if isinstance(fpath, os.PathLike):
-            fpath = os.fspath(fpath)
+    def from_file(cls, fpath: Union[str, os.PathLike]):
         return cls(onnx.load(fpath))
+
+    def save(self, fpath: Union[str, os.PathLike]):
+        onnx.save(self._proto, fpath)
 
     def __init__(self, model: ModelProto):
         self.reindex(model)
@@ -26,11 +26,6 @@ class OnnxModel:
         t = ModelProto()
         t.CopyFrom(self._proto)
         return OnnxModel(t)
-
-    def save(self, fpath):
-        if isinstance(fpath, os.PathLike):
-            fpath = os.fspath(fpath)
-        onnx.save(self._proto, fpath)
 
     def reindex(self, model: ModelProto):
         model = onnx.shape_inference.infer_shapes(model)
@@ -91,7 +86,7 @@ class OnnxModel:
     def input_names(self) -> tuple[str, ...]:
         return tuple(x.name for x in self._inputs)
 
-    def get_input_by_name(self, name) -> ValueInfoProto:
+    def get_input_by_name(self, name: str) -> ValueInfoProto:
         return self._name_to_input.get(name, None)
 
     def outputs(self) -> tuple[ValueInfoProto, ...]:
@@ -170,8 +165,8 @@ class OnnxModel:
 
     def extract(
             self,
-            input_names: Union[set[str], tuple[str, ...]],
-            output_names: Union[set[str], tuple[str, ...]]):
+            input_names: Union[set[str], tuple[str, ...], list[str]],
+            output_names: Union[set[str], tuple[str, ...], list[str]]):
         input_names = set(input_names)
         output_names = set(output_names)
 
@@ -315,6 +310,7 @@ class OnnxModel:
                 onnx_model.graph.input.extend(self._inputs_to_add)
                 onnx_model.graph.output.extend(self._outputs_to_add)
 
+                from onnx.utils import Extractor
                 e = Extractor(onnx_model)
                 new_model = e.extract_model(
                     [x.name for x in onnx_model.graph.input],

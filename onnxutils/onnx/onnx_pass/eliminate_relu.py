@@ -29,6 +29,9 @@ class _:
             for dag in dag_pattern.MatchAllDags(onnx_model):
                 relu_node = dag_pattern.GetNode(dag, 2)
 
+                if onnx_model.get_counter_of_node(relu_node) > 1:
+                    continue
+
                 sess.remap_node_inputs({
                     relu_node.outputs()[0]: relu_node.inputs()[0]
                 })

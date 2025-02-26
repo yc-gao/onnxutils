@@ -6,12 +6,12 @@ import torch
 
 class OnnxTensor:
     @classmethod
-    def from_numpy(cls, array: np.ndarray, name: str = None):
+    def from_numpy(cls, array: np.ndarray, name: str):
         onnx_tensor_proto = onnx.numpy_helper.from_array(array, name=name)
         return cls(onnx_tensor_proto)
 
     @classmethod
-    def from_torch(cls, tensor: torch.Tensor, name: str = None):
+    def from_torch(cls, tensor: torch.Tensor, name: str):
         return cls.from_numpy(tensor.detach().cpu().numpy(), name=name)
 
     def __init__(self, onnx_tensor: TensorProto):

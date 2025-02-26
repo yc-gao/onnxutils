@@ -1,5 +1,4 @@
 from . import convert_constant_to_initializer
-from . import convert_qdq_to_fq
 from . import convert_shape_to_initializer
 from . import eliminate_cast
 from . import eliminate_concat
@@ -11,8 +10,6 @@ from . import eliminate_reshape
 from . import eliminate_split
 from . import eliminate_transpose
 from . import fold_bn_into_conv
-from . import fold_bn_into_gemm
 from . import fold_constant
 from . import onnx_simplifier
-from . import split_conv_bias_to_bn
 from . import eliminate_relu
