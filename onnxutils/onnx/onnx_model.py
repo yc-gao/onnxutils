@@ -17,6 +17,9 @@ class OnnxModel:
     def from_file(fpath: Union[str, os.PathLike]):
         return OnnxModel(onnx.load(fpath))
 
+    def save(self, fpath: Union[str, os.PathLike]):
+        onnx.save(self._proto, fpath)
+
     def __init__(self, model_pb: ModelProto) -> None:
         self.refresh(model_pb)
 
