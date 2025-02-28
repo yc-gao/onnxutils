@@ -1,3 +1,5 @@
+from typing import Any, Union
+
 from .onnx_model import OnnxModel
 
 _optimizer_registry = {}
@@ -20,7 +22,9 @@ def list_optimizers():
     return tuple(_optimizer_registry.keys())
 
 
-def apply_optimizers(onnx_model: OnnxModel, optimizers):
-    for name in optimizers:
-        onnx_model = find_optimizer(name).apply(onnx_model)
+def apply_optimizers(onnx_model: OnnxModel, optimizers: list[Union[str, Any]]):
+    for optim in optimizers:
+        if isinstance(optim, str):
+            optim = find_optimizer(optim)
+        onnx_model = optim.apply(onnx_model)
     return onnx_model

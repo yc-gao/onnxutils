@@ -1,7 +1,0 @@
-./tools/optim.py \
-    --optim convert-constant-to-initializer \
-    --optim convert-shape-to-initializer \
-    --optim onnx-simplifier \
-    --optim convert-shape-to-initializer \
-    -o examples/unimodel/unimodel.optimized.onnx \
-    examples/unimodel/unimodel.onnx
