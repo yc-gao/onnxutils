@@ -1,6 +1,7 @@
 from . import convert_shape_to_initializer
 from . import onnx_simplifier
 from . import fold_constant
+from . import fix_name
 
 from . import convert_constant_to_initializer
 from . import eliminate_cast
