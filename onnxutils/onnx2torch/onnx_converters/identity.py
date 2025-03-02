@@ -16,6 +16,7 @@ class TorchIdentity(nn.Module):
 def _(onnx_node: OnnxNode, _: OnnxModel):  # pylint: disable=unused-argument
     torch_module = TorchIdentity()
     onnx_mapping = {
+        'name': onnx_node.name,
         'inputs': onnx_node.input_names,
         'outputs': onnx_node.output_names,
     }

@@ -8,6 +8,7 @@ from ..converter_registry import add_converter
 def _(onnx_node: OnnxNode, _: OnnxModel):
     torch_module = nn.ReLU()
     onnx_mapping = {
+        'name': onnx_node.name,
         'inputs': onnx_node.input_names,
         'outputs': onnx_node.output_names,
     }
@@ -18,6 +19,7 @@ def _(onnx_node: OnnxNode, _: OnnxModel):
 def _(onnx_node: OnnxNode, _: OnnxModel):
     torch_module = nn.Sigmoid()
     onnx_mapping = {
+        'name': onnx_node.name,
         'inputs': onnx_node.input_names,
         'outputs': onnx_node.output_names,
     }
