@@ -5,7 +5,7 @@ from .onnx_model import OnnxModel
 _optimizer_registry = {}
 
 
-def add_optimizer(name):
+def add_optimizer(name: str):
     def wrapper(cls):
         if name in _optimizer_registry:
             raise RuntimeError(f"optimizer '{name}' already registered")
@@ -14,15 +14,15 @@ def add_optimizer(name):
     return wrapper
 
 
-def find_optimizer(name):
+def find_optimizer(name: str):
     return _optimizer_registry.get(name, None)
 
 
-def list_optimizers():
+def list_optimizers() -> tuple[str, ...]:
     return tuple(_optimizer_registry.keys())
 
 
-def apply_optimizers(onnx_model: OnnxModel, optimizers: list[Union[str, Any]]):
+def apply_optimizers(onnx_model: OnnxModel, optimizers: list[Union[str, Any]]) -> OnnxModel:
     for optim in optimizers:
         if isinstance(optim, str):
             optim = find_optimizer(optim)
