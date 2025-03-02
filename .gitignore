@@ -1,6 +1,5 @@
-build
-dist
 venv
+workdir
 
 .ipynb_checkpoints
 __pycache__
