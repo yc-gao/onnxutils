@@ -11,3 +11,4 @@ from . import max_pool
 from . import max_avg_pool
 from . import flatten
 from . import slice
+from . import gather
