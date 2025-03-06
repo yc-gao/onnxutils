@@ -60,5 +60,6 @@ def _(onnx_node: OnnxNode, _: OnnxModel):
         'name': onnx_node.name,
         'inputs': onnx_node.input_names,
         'outputs': onnx_node.output_names,
+        'params': onnx_node.input_names[1:]
     }
     return torch_module, onnx_mapping
