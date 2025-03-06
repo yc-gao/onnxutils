@@ -21,6 +21,7 @@ def _(onnx_node: OnnxNode, onnx_model: OnnxModel):
 
     torch_module = nn_mapping[len(shape) - 2](output_size=shape[2:])
     onnx_mapping = {
+        'name': onnx_node.name,
         'inputs': onnx_node.input_names,
         'outputs': onnx_node.output_names,
     }
