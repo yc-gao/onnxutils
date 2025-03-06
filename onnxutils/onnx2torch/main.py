@@ -10,8 +10,8 @@ from .converter_registry import find_converter
 
 def normalize_module_name(
         name: str,
-        domain: str = '',
-        op_type: str = '') -> str:
+        op_type: str = '',
+        domain: str = '') -> str:
     name = name or f'{domain}.{op_type}'
     name = name.replace('.', '_')
     name = name.replace('/', '_')
@@ -23,14 +23,14 @@ def convert(
     keep_input_names: bool = True,
 ):
     opset_import: dict[str, int] = {
-        opsetid_proto.domain: opsetid_proto.version for opsetid_proto in onnx_model.opsets  # noqa
+        opsetid_pb.domain: opsetid_pb.version for opsetid_pb in onnx_model.opsets  # noqa
     }
 
     root_module: torch.nn.Module = torch.nn.Module()
     root_graph: torch.fx.Graph = torch.fx.Graph()
 
     nodes_mapping: dict[
-        Union[str, tuple[torch.fx.Node, int]],
+        Union[str, tuple[str, int]],
         torch.fx.Node
     ] = {}
 
@@ -57,16 +57,18 @@ def convert(
             return torch_node
 
         elif onnx_node := onnx_model.get_node_by_output(value_name):
-            torch_node = nodes_mapping[onnx_node.name]
-            if len(onnx_node.output_names) > 1:
-                index = onnx_node.output_names.index(value_name)
-                torch_node_idx = nodes_mapping.get((torch_node, index), None)
-                if torch_node_idx is None:
-                    torch_node_idx = root_graph.call_function(
-                        getitem, args=(torch_node, index))
-                    nodes_mapping[(torch_node, index)] = torch_node_idx
-
-                torch_node = torch_node_idx
+            index = onnx_node.output_names.index(value_name)
+            torch_node = nodes_mapping.get((onnx_node.name, index), None)
+            if torch_node is None:
+                if len(onnx_node.output_names) > 1:
+                    parent_torch_node = nodes_mapping[onnx_node.name]
+                    torch_node = root_graph.call_function(
+                        getitem,
+                        (parent_torch_node, index)
+                    )
+                else:
+                    torch_node = nodes_mapping[onnx_node.name]
+                nodes_mapping[(onnx_node.name, index)] = torch_node
             return torch_node
 
         else:
@@ -97,8 +99,8 @@ def convert(
             torch_module
         )
         nodes_mapping[onnx_node.name] = root_graph.call_module(
-            module_name=normalize_module_name(onnx_node.name),
-            args=tuple(
+            normalize_module_name(onnx_node.name),
+            tuple(
                 get_or_create_torch_node(x)
                 for x in onnx_mapping.get('inputs', [])
             )

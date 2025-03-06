@@ -1,4 +1,4 @@
-from onnx import defs
+import onnx
 
 
 _converter_registry = {}
@@ -7,7 +7,7 @@ _converter_registry = {}
 def add_converter(
     op_type: str,
     version: int,
-    domain: str = defs.ONNX_DOMAIN
+    domain: str = onnx.defs.ONNX_DOMAIN
 ):
     def deco(converter):
         op_key = (op_type, version, domain)
@@ -21,12 +21,11 @@ def add_converter(
 def find_converter(
     op_type: str,
     version: int,
-    domain: str = defs.ONNX_DOMAIN,
+    domain: str = onnx.defs.ONNX_DOMAIN,
 ):
 
-    schema = defs.get_schema(
-        op_type, max_inclusive_version=version, domain=domain,)
-    version = schema and schema.since_version or version
+    if schema := onnx.defs.get_schema(op_type, version, domain):
+        version = schema.since_version
 
     op_key = (op_type, version, domain)
     return _converter_registry.get(op_key, None)
