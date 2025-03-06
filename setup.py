@@ -9,6 +9,7 @@ setup(
         'onnx',
         'onnxoptimizer',
         'onnxsim',
+        'pydash',
     ],
     packages=find_packages(),
 )
