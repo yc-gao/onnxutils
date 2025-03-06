@@ -16,5 +16,6 @@ from . import reshape
 from . import transpose
 from . import split
 from . import expand
+from . import clip
 from . import squeeze
 from . import unsqueeze
