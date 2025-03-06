@@ -1,7 +1,7 @@
 import torch
 from torch import nn
-from onnxutils.onnx import OnnxNode, OnnxModel
 
+from ...onnx import OnnxNode, OnnxModel
 from ..converter_registry import add_converter
 
 func_mapping = {

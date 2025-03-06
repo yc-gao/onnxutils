@@ -4,19 +4,12 @@ from ...onnx import OnnxNode, OnnxModel
 from ..converter_registry import add_converter
 
 
-class TorchIdentity(nn.Module):
-    def __init__(self) -> None:
-        super().__init__()
-
-    def forward(self, x):
-        return x
-
-
-@add_converter(op_type='Identity', version=16)
+@add_converter(op_type='Flatten', version=13)
 def _(onnx_node: OnnxNode, _: OnnxModel):
-    torch_module = TorchIdentity()
+    axis: int = onnx_node.attrs.get('axis', 1)
+
+    torch_module = nn.Flatten(axis)
     onnx_mapping = {
-        'name': onnx_node.name,
         'inputs': onnx_node.input_names,
         'outputs': onnx_node.output_names,
     }
