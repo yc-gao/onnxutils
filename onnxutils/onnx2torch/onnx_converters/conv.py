@@ -23,7 +23,7 @@ class TorchConv(nn.Module):
         self.groups = groups
 
     def forward(self, input, weight, bias=None):
-        self.f(
+        return self.f(
             input, weight, bias,
             self.stride, self.padding, self.dilation, self.groups
         )

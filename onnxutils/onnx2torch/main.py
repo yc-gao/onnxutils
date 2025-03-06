@@ -42,7 +42,7 @@ def convert(
             torch_node = nodes_mapping.get(value_name, None)
             if torch_node is None:
                 initializer_value = torch.from_numpy(
-                    initializer_value.to_numpy())
+                    initializer_value.to_numpy().copy())
                 setattr(initializer_value, 'onnx_mapping', {
                     'name': value_name,
                 })
