@@ -14,4 +14,4 @@ from . import slice
 from . import gather
 from . import concat
 from . import reshape
-
+from . import transpose
