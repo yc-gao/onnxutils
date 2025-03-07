@@ -19,3 +19,4 @@ from . import expand
 from . import clip
 from . import squeeze
 from . import unsqueeze
+from . import matmul
