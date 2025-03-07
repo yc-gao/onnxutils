@@ -22,3 +22,4 @@ from . import unsqueeze
 from . import matmul
 from . import where
 from . import cast
+from . import cum_sum
