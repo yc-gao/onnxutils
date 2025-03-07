@@ -21,3 +21,4 @@ from . import squeeze
 from . import unsqueeze
 from . import matmul
 from . import where
+from . import cast
