@@ -132,10 +132,8 @@ class OnnxModel:
                 input_names: Union[set[str], list[str], tuple[str, ...]],
                 output_names: Union[set[str], list[str], tuple[str, ...]]):
         input_names = set(input_names)
+        input_names.update(self.input_names)
         output_names = set(output_names)
-
-        tensor_visited = set()
-        node_visited = set()
 
         inputs: list[ValueInfoProto] = []
         outputs: list[ValueInfoProto] = [
@@ -145,24 +143,25 @@ class OnnxModel:
         initializers: list[TensorProto] = []
         nodes: list[NodeProto] = []
 
+        tensor_visited = set()
+        node_visited = set()
+
         def dfs(tensor_name):
             if tensor_name in tensor_visited:
                 return
             tensor_visited.add(tensor_name)
 
-            if onnx_node := self.get_node_by_output(tensor_name):
+            if tensor_name in input_names:
+                inputs.append(self._name2vinfo[tensor_name])
+            elif initializer := self.get_initializer_by_name(tensor_name):
+                initializers.append(initializer.proto)
+            elif onnx_node := self.get_node_by_output(tensor_name):
                 if onnx_node.name in node_visited:
                     return
                 node_visited.add(onnx_node.name)
                 for input_name in onnx_node.input_names:
                     dfs(input_name)
                 nodes.append(onnx_node.proto)
-            elif initializer := self.get_initializer_by_name(tensor_name):
-                initializers.append(initializer.proto)
-            elif tensor_name in input_names:
-                inputs.append(self._name2vinfo[tensor_name])
-            elif tensor_name in self.input_names:
-                inputs.append(self._name2vinfo[tensor_name])
             else:
                 assert not tensor_name, f"unmatched tensor '{tensor_name}'"
 
